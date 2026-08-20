@@ -23,12 +23,10 @@ export default function AskPage() {
   const [message, setMessage] = useState('')
   const [sourceMessage, setSourceMessage] = useState('')
   const [response, setResponse] = useState(null)
-  const [draft, setDraft] = useState(null)
-  const [tagsText, setTagsText] = useState('')
+  const [drafts, setDrafts] = useState([])
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [showAccount, setShowAccount] = useState(false)
-  const [saved, setSaved] = useState(null)
 
   const submit = async (event) => {
     event.preventDefault()
@@ -38,16 +36,20 @@ export default function AskPage() {
     setError('')
     setShowAccount(false)
     setResponse(null)
-    setDraft(null)
-    setSaved(null)
+    setDrafts([])
     try {
       const result = user?.isDemo ? createDemoResponse(submitted) : await askMinerva(submitted)
       setResponse(result)
       setSourceMessage(submitted)
       setMessage('')
-      if (result.kind === 'card_draft' && result.card) {
-        setDraft({ front: result.card.front, back: result.card.back })
-        setTagsText((result.card.suggested_tags || []).join(', '))
+      if (result.kind === 'card_draft') {
+        const cards = result.cards || (result.card ? [result.card] : [])
+        setDrafts(cards.map((card) => ({
+          front: card.front,
+          back: card.back,
+          tagsText: (card.suggested_tags || []).join(', '),
+          saved: false,
+        })))
       }
     } catch (requestError) {
       if (requestError.status === 401) return logout()
@@ -60,25 +62,29 @@ export default function AskPage() {
   }
 
   const turnIntoCard = () => {
-    setDraft({ front: sourceMessage, back: response.reply })
-    setTagsText('')
-    setSaved(null)
+    setDrafts([{ front: sourceMessage, back: response.reply, tagsText: '', saved: false }])
   }
 
-  const save = async (event) => {
+  const updateDraft = (index, field, value) => {
+    setDrafts((items) => items.map((draft, draftIndex) => draftIndex === index ? { ...draft, [field]: value } : draft))
+  }
+
+  const save = async (event, index) => {
     event.preventDefault()
-    if (!draft?.front.trim() || !draft?.back.trim() || busy) return
-    setBusy('save')
+    const draft = drafts[index]
+    if (!draft?.front.trim() || !draft?.back.trim() || busy || draft.saved) return
+    setBusy(`save-${index}`)
     setError('')
     try {
       const payload = {
         front: draft.front.trim(),
         back: draft.back.trim(),
-        tags: tagsText.split(',').map((tag) => tag.trim()).filter(Boolean),
+        tags: draft.tagsText.split(',').map((tag) => tag.trim()).filter(Boolean),
         sourceMessage,
       }
-      const card = user?.isDemo ? createDemoFlashcard(payload) : await createFlashcard(payload, requestId())
-      setSaved(card)
+      if (user?.isDemo) createDemoFlashcard(payload)
+      else await createFlashcard(payload, requestId())
+      updateDraft(index, 'saved', true)
     } catch (requestError) {
       if (requestError.status === 401) return logout()
       setError(requestError.message || 'Could not add this card to the rotation.')
@@ -120,19 +126,20 @@ export default function AskPage() {
 
       {response && (
         <section className="minerva-response" aria-live="polite">
-          <header><div><p className="eyebrow">{response.kind === 'card_draft' ? 'Draft ready' : response.kind === 'clarification' ? 'One question' : 'Minerva answers'}</p><h2>{response.kind === 'card_draft' ? 'Review before saving.' : 'A considered answer.'}</h2></div>{response.kind === 'answer' && !draft && <button className="secondary-button" type="button" onClick={turnIntoCard}>Turn into flashcard</button>}</header>
+          <header><div><p className="eyebrow">{response.kind === 'card_draft' ? 'Draft ready' : response.kind === 'clarification' ? 'One question' : 'Minerva answers'}</p><h2>{response.kind === 'card_draft' ? 'Review before saving.' : 'A considered answer.'}</h2></div>{response.kind === 'answer' && drafts.length === 0 && <button className="secondary-button" type="button" onClick={turnIntoCard}>Turn into flashcard</button>}</header>
           <p className="response-copy">{response.reply}</p>
 
-          {draft && (
-            <form className="card-draft-form" onSubmit={save}>
+          {drafts.map((draft, index) => (
+            <form className="card-draft-form" onSubmit={(event) => save(event, index)} key={index}>
+              {drafts.length > 1 && <p className="card-draft-number">Card {index + 1} of {drafts.length}</p>}
               <div className="card-draft-grid">
-                <label htmlFor="card-front"><span>Front · prompt</span><textarea id="card-front" value={draft.front} onChange={(event) => setDraft((current) => ({ ...current, front: event.target.value }))} rows="4" maxLength="500" disabled={Boolean(saved)} /></label>
-                <label htmlFor="card-back"><span>Back · answer</span><textarea id="card-back" value={draft.back} onChange={(event) => setDraft((current) => ({ ...current, back: event.target.value }))} rows="6" maxLength="4000" disabled={Boolean(saved)} /></label>
+                <label htmlFor={`card-front-${index}`}><span>Front · prompt</span><textarea id={`card-front-${index}`} value={draft.front} onChange={(event) => updateDraft(index, 'front', event.target.value)} rows="4" maxLength="500" disabled={draft.saved} /></label>
+                <label htmlFor={`card-back-${index}`}><span>Back · answer</span><textarea id={`card-back-${index}`} value={draft.back} onChange={(event) => updateDraft(index, 'back', event.target.value)} rows="6" maxLength="4000" disabled={draft.saved} /></label>
               </div>
-              <label className="tag-field" htmlFor="card-tags"><span>Tags · separated by commas</span><input id="card-tags" value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="computing, javascript" disabled={Boolean(saved)} /></label>
-              <footer><p>{saved ? 'Saved. This card is now due in your rotation.' : 'Nothing is stored until you confirm.'}</p><button className="primary-button" type="submit" disabled={Boolean(busy) || Boolean(saved) || !draft.front.trim() || !draft.back.trim()}>{busy === 'save' ? 'Adding…' : saved ? 'Added to rotation' : 'Add to rotation'} <span aria-hidden="true">✓</span></button></footer>
+              <label className="tag-field" htmlFor={`card-tags-${index}`}><span>Tags · separated by commas</span><input id={`card-tags-${index}`} value={draft.tagsText} onChange={(event) => updateDraft(index, 'tagsText', event.target.value)} placeholder="computing, javascript" disabled={draft.saved} /></label>
+              <footer><p>{draft.saved ? 'Saved. This card is now due in your rotation.' : 'Nothing is stored until you confirm.'}</p><button className="primary-button" type="submit" disabled={Boolean(busy) || draft.saved || !draft.front.trim() || !draft.back.trim()}>{busy === `save-${index}` ? 'Adding…' : draft.saved ? 'Added to rotation' : 'Add to rotation'} <span aria-hidden="true">✓</span></button></footer>
             </form>
-          )}
+          ))}
         </section>
       )}
     </main>

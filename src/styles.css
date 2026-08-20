@@ -99,6 +99,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .minerva-response .eyebrow { margin-bottom: .55rem; }
 .response-copy { max-width: 50rem; margin: 0; padding: clamp(1.35rem, 4vw, 2rem); color: var(--soft); font-size: .92rem; line-height: 1.75; white-space: pre-wrap; }
 .card-draft-form { border-top: 1px solid var(--line); }
+.card-draft-number { margin: 0; padding: 1rem clamp(1.2rem, 3vw, 1.75rem) 0; color: var(--gold); font-family: 'DM Mono', monospace; font-size: .61rem; letter-spacing: .08em; text-transform: uppercase; }
 .card-draft-grid { display: grid; grid-template-columns: 1fr 1fr; }
 .card-draft-grid label { display: grid; gap: .65rem; padding: clamp(1.2rem, 3vw, 1.75rem); }
 .card-draft-grid label + label { border-left: 1px solid var(--line); }

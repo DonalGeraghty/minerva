@@ -42,11 +42,11 @@ describe('Minerva creation and review flows', () => {
     askMinerva.mockResolvedValue({
       kind: 'card_draft',
       reply: 'I prepared a Hindi card.',
-      card: {
+      cards: [{
         front: sampleCard.front,
         back: sampleCard.back,
         suggested_tags: ['hindi'],
-      },
+      }],
     })
     createFlashcard.mockResolvedValue(sampleCard)
     const user = userEvent.setup()
@@ -67,6 +67,33 @@ describe('Minerva creation and review flows', () => {
       expect.any(String),
     ))
     expect(await screen.findByText(/saved\. this card is now due/i)).toBeInTheDocument()
+  })
+
+  it('reviews and saves multiple generated cards independently', async () => {
+    const secondCard = { ...sampleCard, id: 'card-2', front: 'What part of speech is कल?', back: 'Adverb.' }
+    askMinerva.mockResolvedValue({
+      kind: 'card_draft',
+      reply: 'I prepared two Hindi cards.',
+      cards: [
+        { front: sampleCard.front, back: sampleCard.back, suggested_tags: ['hindi'] },
+        { front: secondCard.front, back: secondCard.back, suggested_tags: ['hindi', 'grammar'] },
+      ],
+    })
+    createFlashcard.mockResolvedValueOnce(sampleCard).mockResolvedValueOnce(secondCard)
+    const user = userEvent.setup()
+    render(<MemoryRouter><AskPage /></MemoryRouter>)
+
+    await user.type(screen.getByLabelText('What would you like to learn?'), 'Make two cards about kal')
+    await user.click(screen.getByRole('button', { name: /ask minerva/i }))
+
+    expect(await screen.findByText('Card 1 of 2')).toBeInTheDocument()
+    expect(screen.getByText('Card 2 of 2')).toBeInTheDocument()
+    const saveButtons = screen.getAllByRole('button', { name: /add to rotation/i })
+    await user.click(saveButtons[0])
+    await user.click(saveButtons[1])
+
+    await waitFor(() => expect(createFlashcard).toHaveBeenCalledTimes(2))
+    expect(createFlashcard).toHaveBeenNthCalledWith(2, expect.objectContaining({ front: secondCard.front, back: secondCard.back, tags: ['hindi', 'grammar'] }), expect.any(String))
   })
 
   it('reveals a due card and records a recall rating', async () => {
