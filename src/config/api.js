@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   AUTH_DELETE_ACCOUNT: '/api/auth/account',
   AI_SETTINGS: '/api/user/ai-settings',
   AI_CREDENTIALS: '/api/user/ai-credentials',
+  MINERVA_SETTINGS: '/api/user/minerva-settings',
   MINERVA_RESPOND: '/api/minerva/respond',
   FLASHCARDS: '/api/flashcards',
   FLASHCARDS_DUE: '/api/flashcards/due',
