@@ -93,6 +93,7 @@ jobs:
             --project "${PROJECT_ID}" \
             --region "${REGION}" \
             --platform managed \
+            --allow-unauthenticated \
             --port 8080 \
             --memory 256Mi \
             --cpu 1 \

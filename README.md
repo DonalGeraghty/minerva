@@ -72,7 +72,7 @@ The GitHub Actions workflow expects an Artifact Registry repository named `miner
 
 ### First GitHub Actions deployment
 
-The workflow at `.github/workflows/deploy-gcp.yml` follows the Aether Cloud Run pattern: it checks every pull request and builds, pushes, deploys, then health-checks Minerva for pushes to `main` or `master`.
+The workflow at `.github/workflows/deploy-gcp.yml` follows the Aether Cloud Run pattern: it checks every pull request and builds, pushes, deploys, then health-checks a publicly accessible Minerva service for pushes to `main` or `master`.
 
 Before the first push, complete these one-time Google Cloud and GitHub steps:
 
