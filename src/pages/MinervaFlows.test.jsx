@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AskPage from './AskPage.jsx'
 import FlashcardsPage from './FlashcardsPage.jsx'
-import { createFlashcard, listDueFlashcards, listFlashcards, reviewFlashcard } from '../services/flashcards.js'
+import { createFlashcard, deleteFlashcard, listDueFlashcards, listFlashcards, reviewFlashcard } from '../services/flashcards.js'
 import { askMinerva } from '../services/minerva.js'
 
 const { logoutMock } = vi.hoisted(() => ({ logoutMock: vi.fn() }))
@@ -80,5 +80,20 @@ describe('Minerva creation and review flows', () => {
     await user.click(screen.getByRole('button', { name: /good/i }))
     await waitFor(() => expect(reviewFlashcard).toHaveBeenCalledWith('card-1', 'good', expect.any(String)))
     expect(await screen.findByText(/you are caught up/i)).toBeInTheDocument()
+  })
+
+  it('deletes a library card immediately without a confirmation popup', async () => {
+    deleteFlashcard.mockResolvedValue(undefined)
+    const confirmSpy = vi.spyOn(window, 'confirm')
+    const user = userEvent.setup()
+    render(<MemoryRouter><FlashcardsPage /></MemoryRouter>)
+
+    await user.click(await screen.findByRole('tab', { name: /all cards/i }))
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
+
+    await waitFor(() => expect(deleteFlashcard).toHaveBeenCalledWith('card-1'))
+    expect(confirmSpy).not.toHaveBeenCalled()
+    expect(screen.queryByText(sampleCard.front)).not.toBeInTheDocument()
+    confirmSpy.mockRestore()
   })
 })

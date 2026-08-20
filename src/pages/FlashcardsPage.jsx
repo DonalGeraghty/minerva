@@ -119,7 +119,6 @@ export default function FlashcardsPage() {
   }
 
   const remove = async (card) => {
-    if (!window.confirm(`Delete “${card.front}”? This cannot be undone.`)) return
     setBusy(`delete-${card.id}`)
     setError('')
     try {
