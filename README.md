@@ -55,7 +55,7 @@ npm run check
 npm run build
 ```
 
-The frontend tests cover confirmation-only card creation and the due-card review flow. Janus API contains API, isolation, scheduling, idempotency, and account-deletion tests.
+The frontend tests cover confirmation-only card creation and the due-card review flow. Janus API contains API, isolation, scheduling, idempotency, and account-deletion tests. The production build also verifies that development-only demo fixtures are absent and that public icon assets stay within their size budgets.
 
 ## Cloud Run
 

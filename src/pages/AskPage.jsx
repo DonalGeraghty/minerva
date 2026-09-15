@@ -5,10 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { createFlashcard } from '../services/flashcards.js'
 import { askMinerva } from '../services/minerva.js'
 import { createDemoFlashcard, createDemoResponse } from '../services/demoStore.js'
-
-function requestId() {
-  return globalThis.crypto?.randomUUID?.() || `00000000-0000-4000-8000-${Math.random().toString(16).slice(2).padEnd(12, '0').slice(0, 12)}`
-}
+import { requestId } from '../utils/id.js'
 
 function errorDetails(error) {
   if (error.code === 'provider_key_required') return { message: error.message, account: true }
