@@ -15,6 +15,8 @@ The gallery is an infinite wall of repeated cards across depth layers. The wheel
 
 Rendering is limited to 160 visible planes plus at most one focused plane. Camera input is coalesced to animation frames, card-face content is memoized, and retired depth layers are recycled rather than accumulated. No review data is written by wall navigation or flipping.
 
+Phones and coarse-pointer devices use a 48-card budget plus the selected card, fewer depth layers, lighter shadows, and a stable two-face reveal. Camera depth is projected into screen-space transforms, with the selected card pinned above the wall so it cannot be hidden by nearer cards. Touch input captures the stage immediately, ignores capture-loss events from child cards during transfer, and uses normalized drag sensitivity and shorter inertia. Focus fits the measured stage and adjusts on resize.
+
 Cards use wider spacing across the wall and between depth layers. Distant visible cards remain keyboard-focusable, with a screen-space click fallback that gives small cards extra tolerance while respecting nearer cards that cover them.
 
 The Gallery uses an original CSS 3D component, with a bounded set of recycled card planes and no external image service or animation dependency. Flashcard content stays in the existing Janus/browser flow. Browsing does not update review scheduling. React Bits Pro Infinite Gallery was considered, but its license requirement was declined; no paid component or registry configuration is installed.

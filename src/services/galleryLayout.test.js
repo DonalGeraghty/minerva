@@ -1,7 +1,31 @@
 import { describe, expect, it } from 'vitest'
-import { focusGalleryCamera, galleryLayout, GALLERY_CARD_WIDTH, GALLERY_FOCAL_LENGTH, GALLERY_FOCUSED_HEIGHT, INITIAL_GALLERY_CAMERA, MAX_GALLERY_PLANES, pickGalleryPlane, pinchGallery, projectGalleryPlane, zoomGallery } from './galleryLayout.js'
+import { focusGalleryCamera, galleryLayout, GALLERY_CARD_WIDTH, GALLERY_FOCAL_LENGTH, GALLERY_FOCUSED_HEIGHT, INITIAL_GALLERY_CAMERA, MAX_GALLERY_PLANES, MAX_MOBILE_GALLERY_PLANES, pickGalleryPlane, pinchGallery, projectGalleryPlane, zoomGallery } from './galleryLayout.js'
 
 describe('Infinite card wall', () => {
+  it('uses a smaller mobile budget at every travel depth, including landscape touch devices', () => {
+    for (const viewport of [{ width: 360, height: 380 }, { width: 900, height: 400, mobile: true }]) {
+      for (const depth of [0, 10000, -1000000]) {
+        const planes = galleryLayout({ x: 5000, y: -2500, depth }, 200, viewport)
+        expect(planes.length).toBeGreaterThan(0)
+        expect(planes.length).toBeLessThanOrEqual(MAX_MOBILE_GALLERY_PLANES)
+      }
+    }
+  })
+
+  it('keeps mobile focus clear of the projection near plane throughout travel', () => {
+    const viewport = { width: 360, height: 380 }
+    const plane = galleryLayout(INITIAL_GALLERY_CAMERA, 7, viewport).at(-1)
+    const target = focusGalleryCamera(plane, viewport)
+    for (let frame = 0; frame <= 60; frame++) {
+      const camera = Object.fromEntries(['x', 'y', 'depth'].map((key) => [key, INITIAL_GALLERY_CAMERA[key] + (target[key] - INITIAL_GALLERY_CAMERA[key]) * frame / 60]))
+      const projected = projectGalleryPlane(plane, camera, viewport)
+      expect(projected.scale).toBeGreaterThan(0)
+      expect(Number.isFinite(projected.scale)).toBe(true)
+    }
+    const focused = projectGalleryPlane(plane, target, viewport)
+    expect(focused.scale).toBeLessThanOrEqual(1.15)
+    expect(focused.scale * GALLERY_FOCUSED_HEIGHT).toBeLessThanOrEqual(viewport.height * 0.78 + 0.001)
+  })
   it('makes distant visible cards focusable and picks their screen-space targets', () => {
     const viewport = { width: 1000, height: 620 }
     const far = projectGalleryPlane({ key: 'far', worldX: 0, worldY: 0, worldZ: 3000 }, INITIAL_GALLERY_CAMERA, viewport)

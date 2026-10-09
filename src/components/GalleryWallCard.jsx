@@ -8,9 +8,9 @@ const CardFaces = memo(function CardFaces({ card, focused, flipped, due }) {
       <span className="gallery-face-body">{card.front}</span>
       <span className="gallery-plane-footer">{focused ? 'Click again to reveal' : 'Click to focus'} <span className="gallery-open-icon" aria-hidden="true">{focused ? '↻' : '↗'}</span></span>
     </span>
-    <span className="gallery-card-face gallery-card-back" aria-hidden={!flipped}>
+    {focused && <span className="gallery-card-face gallery-card-back" aria-hidden={!flipped}>
       {!blank && <><span className="gallery-plane-tag">Answer</span><span className="gallery-face-body">{card.back}</span><span className="gallery-plane-footer">Click to show prompt <span aria-hidden="true">↻</span></span></>}
-    </span>
+    </span>}
   </span>
 })
 
@@ -20,8 +20,8 @@ export default function GalleryWallCard({ card, plane, focused, flipped, now, on
     data-plane-key={plane.key} data-plane-scale={plane.scale} data-focused={focused || undefined} data-side={flipped ? 'back' : 'front'}
     aria-label={`${focused ? 'Flip' : 'Focus'} flashcard: ${card.front}`} aria-pressed={focused ? flipped : undefined}
     onClick={(event) => onActivate(plane, event.detail === 0)}
-    style={{ '--card-depth': focused ? 1 : Math.max(0.35, Math.min(1, plane.scale)),
-      transform: `translate3d(calc(-50% + ${plane.x}px), calc(-50% + ${plane.y}px), ${plane.z}px) rotateX(${focused ? 0 : plane.rotateX}deg) rotateY(${focused ? 0 : plane.rotateY}deg)` }}>
+    style={{ '--card-depth': focused ? 1 : Math.max(0.35, Math.min(1, plane.scale)), zIndex: focused ? 10000 : Math.round(4000 + plane.z),
+      transform: `translate3d(calc(-50% + ${plane.x * plane.scale}px), calc(-50% + ${plane.y * plane.scale}px), 0) scale(${plane.scale}) rotateZ(${focused ? 0 : plane.rotateY * 0.3}deg)` }}>
     <CardFaces card={card} focused={focused} flipped={flipped} due={due} />
   </button>
 }

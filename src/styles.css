@@ -17,7 +17,7 @@
 .gallery-stage { position: relative; width: 100%; height: clamp(460px, 68vh, 740px); overflow: hidden; border: 1px solid var(--line); border-radius: 0 0 1rem 1rem; background: radial-gradient(ellipse at 50% 45%, #1a160c, #050504 72%); perspective: 1100px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .gallery-stage::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .18; background-image: radial-gradient(#756847 1px, transparent 1px); background-size: 36px 36px; mask-image: radial-gradient(ellipse, #000, transparent 75%); }
 .gallery-stage.is-dragging { cursor: grabbing; }
-.gallery-world { position: absolute; inset: 0; transform-style: preserve-3d; transform: translate3d(var(--look-x, 0px), var(--look-y, 0px), 0); transition: transform 200ms ease-out; }
+.gallery-world { position: absolute; inset: 0; transform-style: flat; transform: translate3d(var(--look-x, 0px), var(--look-y, 0px), 0); transition: transform 200ms ease-out; }
 .gallery-stage.is-dragging .gallery-world { transition: none; }
 .gallery-plane { position: absolute; top: 50%; left: 50%; display: flex; flex-direction: column; justify-content: space-between; width: 278px; height: 208px; gap: 1rem; padding: 1.2rem 1.35rem; border: 1px solid #64583b; border-radius: .9rem; color: var(--text); background: linear-gradient(145deg, #28251b, #13120e); box-shadow: 0 22px 65px rgb(0 0 0 / 55%), inset 0 1px 0 rgb(255 246 212 / 8%); text-align: left; font-family: 'Manrope', sans-serif; cursor: pointer; backface-visibility: hidden; opacity: var(--card-depth, 1); transition: border-color 150ms, box-shadow 150ms, background 150ms; }
 .gallery-plane:hover,.gallery-plane:focus-visible { opacity: 1; border-color: var(--gold); background: linear-gradient(145deg, #302a1a, #19160e); box-shadow: 0 22px 70px rgb(0 0 0 / 55%), 0 0 25px rgb(209 181 109 / 10%); }
@@ -55,7 +55,7 @@
 .gallery-preview-navigation span { font-family: 'DM Mono', monospace; font-size: .7rem; color: var(--soft); }
 .gallery-stage.is-reduced-motion .gallery-world { transform: none; transition: none; }
 .gallery-stage.has-focused-card .gallery-world { transform: none; transition: none; }
-.gallery-plane { padding: 0; border: 0; background: transparent; transform-style: preserve-3d; }
+.gallery-plane { padding: 0; border: 0; background: transparent; transform-style: preserve-3d; perspective: 1000px; }
 .gallery-plane:hover,.gallery-plane:focus-visible { background: transparent; }
 .gallery-plane.is-focused { height: 300px; opacity: 1; }
 .gallery-card-turn { position: absolute; inset: 0; display: block; transform-style: preserve-3d; transition: transform 450ms cubic-bezier(.2,.7,.2,1); }
@@ -68,6 +68,13 @@
 .gallery-plane.is-focused .gallery-face-body { display: block; flex: 1; overflow-y: auto; font-size: 1rem; scrollbar-width: thin; scrollbar-color: #756847 transparent; }
 .gallery-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media(prefers-reduced-motion:reduce) { .gallery-card-turn { transition: none; } }
+.gallery-stage.is-mobile .gallery-world { transition: none; }
+.gallery-stage.is-mobile .gallery-plane { box-shadow: 0 8px 20px rgb(0 0 0 / 35%); transition: none; transform-style: flat; perspective: none; }
+.gallery-stage.is-mobile .gallery-plane.is-focused { box-shadow: 0 12px 30px rgb(0 0 0 / 50%); }
+.gallery-stage.is-mobile .gallery-card-turn,.gallery-stage.is-mobile .gallery-card-turn.is-flipped { transform: none; transform-style: flat; transition: none; }
+.gallery-stage.is-mobile .gallery-card-face { transform: none; backface-visibility: visible; -webkit-backface-visibility: visible; }
+.gallery-stage.is-mobile .gallery-card-face[aria-hidden='true'] { visibility: hidden; }
+.gallery-stage.is-mobile .gallery-card-face[aria-hidden='false'] { visibility: visible; }
 @media(max-width:600px) { .gallery-hero { flex-wrap: wrap; padding-top: 2.2rem; gap: .5rem; }.gallery-hero h1 { font-size: clamp(2.8rem, 12vw, 4rem); }.gallery-stage { height: 58svh; min-height: 380px; }.gallery-controls { padding: .6rem; }.gallery-controls button { min-width: 40px; min-height: 44px; }.gallery-controls .gallery-control-caption { display: none; }.gallery-plane { width: 260px; }.gallery-tools input,.gallery-tools select { font-size: 16px; }.flashcard-gallery.is-expanded { padding: .5rem; } }
 @media(prefers-reduced-motion:reduce) { .gallery-world { transition: none; }.ambient-orbit-one { animation: none; } }
 
