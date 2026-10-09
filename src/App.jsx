@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext.jsx'
 import AccountPage from './pages/AccountPage.jsx'
 import AskPage from './pages/AskPage.jsx'
 import FlashcardsPage from './pages/FlashcardsPage.jsx'
+import GalleryPage from './pages/GalleryPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
 
 function ProtectedLayout() {
@@ -21,6 +22,7 @@ export default function App() {
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<AskPage />} />
           <Route path="/flashcards" element={<FlashcardsPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

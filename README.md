@@ -9,6 +9,15 @@ Minerva is an AI-assisted flashcard and active-recall application built with Rea
 3. Add the card to the rotation explicitly; AI responses are never saved automatically.
 4. Review due cards and rate recall as Again, Hard, Good, or Easy.
 5. Search, filter, edit, or delete the complete card library.
+6. Open **Gallery** to drift through an endless 3D field of your flashcards, filter by text or tag, and select a card to reveal its answer. Keyboard navigation, zoom controls, and a card-list view are available. Reduced-motion users start in the list view.
+
+The gallery is an infinite wall of repeated cards across depth layers. The wheel, pinch gesture, and zoom buttons travel continuously through those layers without a zoom end-stop. Click a card once to centre and fit that physical copy in the field; click it again to flip in place. Missing answers render a blank reverse face. Dragging pans the wall. Expanded view, keyboard controls, and due/scheduled indicators remain available; the separate card-list view retains full previews.
+
+Rendering is limited to 160 visible planes plus at most one focused plane. Camera input is coalesced to animation frames, card-face content is memoized, and retired depth layers are recycled rather than accumulated. No review data is written by wall navigation or flipping.
+
+Cards use wider spacing across the wall and between depth layers. Distant visible cards remain keyboard-focusable, with a screen-space click fallback that gives small cards extra tolerance while respecting nearer cards that cover them.
+
+The Gallery uses an original CSS 3D component, with a bounded set of recycled card planes and no external image service or animation dependency. Flashcard content stays in the existing Janus/browser flow. Browsing does not update review scheduling. React Bits Pro Infinite Gallery was considered, but its license requirement was declined; no paid component or registry configuration is installed.
 
 ## Local development
 
