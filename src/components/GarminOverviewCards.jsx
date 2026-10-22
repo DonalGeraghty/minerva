@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import GarminResourceCard from './GarminResourceCard.jsx'
+import ActivitySummary from './ActivitySummary.jsx'
 import useGarminResource from '../hooks/useGarminResource.js'
 import { daysBefore, getGarminActivities, getGarminSleep, getGarminSteps } from '../services/garmin.js'
 
@@ -25,11 +27,22 @@ export function StepsCard({ date, now }) {
 export function SleepCard({ date, now }) {
   const state = useGarminResource(getGarminSleep, date, now)
   const payload = state.current?.data
-  const sleep = payload && Object.hasOwn(payload, 'dailySleepDTO') ? payload.dailySleepDTO : payload
+  const [selection, setSelection] = useState(null)
+  const selected = selection?.end === date ? selection.day : date
+  const records = Array.isArray(payload) ? payload : []
+  const nights = Array.from({ length: 7 }, (_, index) => {
+    const day = daysBefore(date, 6 - index)
+    const record = records.find((row) => row.calendarDate === day)
+    const sleep = record && Object.hasOwn(record, 'dailySleepDTO') ? record.dailySleepDTO : record
+    return { day, sleep, total: measurement(sleep?.sleepTimeSeconds) }
+  })
+  const sleep = nights.find((night) => night.day === selected)?.sleep
   const total = measurement(sleep?.sleepTimeSeconds)
   const overall = measurement(sleep?.sleepScores?.overall?.value)
   const stages = [['Deep', 'deepSleepSeconds'], ['Light', 'lightSleepSeconds'], ['REM', 'remSleepSeconds'], ['Awake', 'awakeSleepSeconds']]
-  return <GarminResourceCard id="sleep" title="Sleep" resource="sleep" state={state} now={now} description="Main sleep recorded for the selected Garmin calendar date.">
+  return <GarminResourceCard id="sleep" title="Sleep" resource="sleep" state={state} now={now} description={`Seven nights ending ${date}. Select a night to explore its sleep stages.`}>
+    <SleepChart nights={nights} selected={selected} onSelect={(day) => setSelection({ end: date, day })} />
+    <h3 className="sleep-selected-night">Recorded for {selected}</h3>
     {total === null ? <p>No sleep measurement is available for this date.</p> : <>
       <p className="garmin-step-total">{duration(total)} <span>asleep</span></p>
       <p>Sleep score: <strong>{overall !== null && overall <= 100 ? `${overall}/100` : 'Unavailable'}</strong></p>
@@ -38,23 +51,33 @@ export function SleepCard({ date, now }) {
   </GarminResourceCard>
 }
 
-function activityTime(value) {
-  if (typeof value !== 'string') return 'Date unavailable'
-  // Preserve the recorded local clock rather than interpreting it as UTC.
-  return value.replace('T', ' ').slice(0, 16)
+function SleepChart({ nights, selected, onSelect }) {
+  const recorded = nights.filter((night) => night.total !== null)
+  const average = recorded.length ? recorded.reduce((sum, night) => sum + night.total, 0) / recorded.length : null
+  const maximum = Math.max(8, ...recorded.map((night) => Math.ceil(night.total / 3600)))
+  return <div className="sleep-history">
+    <p className="sleep-history-summary">{average === null ? 'No sleep recorded in this seven-day window.' : `Average ${duration(average)} across ${recorded.length} recorded night${recorded.length === 1 ? '' : 's'}.`}</p>
+    <p className="sleep-chart-scale">Sleep duration · 0–{maximum} hours</p>
+    <div className="sleep-chart" role="group" aria-label="Sleep duration over seven days">
+      {nights.map(({ day, sleep, total }) => {
+        const score = measurement(sleep?.sleepScores?.overall?.value)
+        const label = `${day}: ${total === null ? 'No sleep data' : duration(total)}${score !== null && score <= 100 ? `, sleep score ${score}/100` : ''}`
+        const clock = new Date(`${day}T12:00:00Z`)
+        return <button key={day} type="button" className="sleep-chart-night" aria-label={label} aria-pressed={selected === day} title={label} onClick={() => onSelect(day)}>
+          <span className="sleep-chart-track" aria-hidden="true">{total === null ? <span className="sleep-chart-missing">—</span> : <span className="sleep-chart-bar" style={{ height: `${total / (maximum * 3600) * 100}%` }} />}</span>
+          <span className="sleep-chart-weekday">{clock.toLocaleDateString(undefined, { weekday: 'short', timeZone: 'UTC' })}</span>
+          <span className="sleep-chart-date">{clock.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
+        </button>
+      })}
+    </div>
+    <p className="sleep-chart-hint">Select a bar for duration, score and stages. A dash means no data; missing nights are excluded from the average.</p>
+  </div>
 }
 
 export function ActivitiesCard({ date, now }) {
   const state = useGarminResource(getGarminActivities, date, now)
   const activities = state.current?.data || []
   return <GarminResourceCard id="activities" title="Recent activities" resource="activities" state={state} now={now} description={`Latest 5 activities · ${daysBefore(date, 27)} to ${date}, inclusive. Times are activity local time.`}>
-    {activities.length ? <ul className="garmin-activity-list">{activities.map((activity) => {
-      const type = typeof activity.activityType?.typeKey === 'string' ? activity.activityType.typeKey.replaceAll('_', ' ') : 'Activity'
-      const distance = measurement(activity.distance)
-      return <li key={activity.activityId}>
-        <div><h3>{activity.activityName || type}</h3><p>{type} · <span>{activityTime(activity.startTimeLocal)}</span></p></div>
-        <dl><div><dt>Duration</dt><dd>{duration(activity.duration)}</dd></div><div><dt>Distance</dt><dd>{distance === null ? 'Unavailable' : `${(distance / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })} km`}</dd></div></dl>
-      </li>
-    })}</ul> : <p>No activities were returned for this 28-day period.</p>}
+    {activities.length ? <ul className="garmin-activity-list">{activities.map((activity) => <ActivitySummary key={activity.activityId} activity={activity} />)}</ul> : <p>No activities were returned for this 28-day period.</p>}
   </GarminResourceCard>
 }

@@ -4,6 +4,10 @@ Status: connection and steps milestone deployed and verified by the user. Study 
 
 ### First milestone delivered
 
+The sleep card now includes a seven-day duration chart ending on the selected date, recorded-night average, and selectable nightly score/stage details. Missing nights remain gaps. Janus fetches the window with one bounded history request and caches it independently of the single-day sleep response; Sleep refresh updates the whole seven-day window.
+
+Recent activities now show heart rate and calories beside duration/distance, with expandable movement, training/recovery, sport metrics, recorded heart-rate zone bars, and strength exercise summaries. These use fields already preserved by Janus's activity search response, without additional endpoint requests.
+
 The current frontend has Garmin Overview at `/` and connection controls in Account. Legacy study URLs redirect to Overview. Janus implements connection GET/PUT/DELETE, steps/sleep/activity GET, and independent-resource POST refresh, with encrypted key/token persistence, generation checks, account deletion cleanup, bounded date ranges, refresh locking/backoff, and stale-data fallback. Synthetic integration and UI tests exercise this path. Saved dashboard preferences, the remaining resources, and Garmin-only cache clearing remain future work in this plan. Ask, Flashcards, Gallery, scheduling/drafting code, and card-context endpoints have been removed; historical records retain account-deletion cleanup.
 
 ## 1. Scope and agreed behaviour
