@@ -9,7 +9,7 @@ export default function useDashboardPanels(user, logout) {
     if (!key || user?.isDemo) return
     const controller = new AbortController()
     getPanelPreferences(controller.signal).then((data) => {
-      if (!controller.signal.aborted) setState({ key, panels: data.preferences.visible_panels, message: '' })
+      if (!controller.signal.aborted) setState({ key, panels: data.preferences.visible_panels.filter((id) => defaultPanels.includes(id)), message: '' })
     }).catch((error) => {
       if (controller.signal.aborted) return
       if (error.status === 401) logout()

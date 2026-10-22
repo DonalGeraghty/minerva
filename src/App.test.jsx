@@ -28,95 +28,97 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-describe('Garmin-only navigation', () => {
-  it.each(['/', '/ask', '/flashcards', '/gallery'])('opens the dashboard for %s without study endpoints', async (path) => {
+describe('Garmin dashboard navigation', () => {
+  it.each(['/', '/ask', '/flashcards', '/gallery'])('opens the dashboard for %s', async (path) => {
     open(path)
-    expect(await screen.findByRole('heading', { name: 'Overview.' })).toBeInTheDocument()
-    await waitFor(() => expect(window.location.pathname).toBe('/'))
+    expect(await screen.findByRole('heading', { name: 'Dashboard.' })).toBeInTheDocument()
     await waitFor(() => expect(getGarminSteps).toHaveBeenCalled())
-    expect(screen.getByRole('navigation', { name: 'Primary navigation' }).querySelectorAll('a')).toHaveLength(6)
-    expect(screen.queryByRole('link', { name: /flashcards|gallery|ask/i })).not.toBeInTheDocument()
+    expect(window.location.pathname).toBe('/')
+    expect(navigation().getAllByRole('link')).toHaveLength(3)
+    expect(navigation().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('keeps Overview to five linked summaries and does not mount detailed charts', async () => {
+  it('shows all seven detailed panels with charts, and leaves activities on its own tab', async () => {
+    healthLoaders.hrv.mockResolvedValue(response([{ calendarDate: localDate(), lastNightAvg: 55 }]))
     open()
-    await screen.findByRole('region', { name: 'Latest activity' })
-    expect(screen.getAllByRole('region')).toHaveLength(5)
-    expect(screen.queryByRole('img')).not.toBeInTheDocument()
-    expect(screen.queryByRole('group', { name: 'Sleep duration over seven days' })).not.toBeInTheDocument()
-    for (const resource of ['stress', 'hrv', 'movement', 'weight', 'hydration', 'fitness-age']) expect(healthLoaders[resource]).not.toHaveBeenCalled()
-    expect(screen.getByRole('link', { name: /View sleep in Recovery/ })).toHaveAttribute('href', `/recovery?date=${localDate()}#sleep`)
+    await screen.findByRole('region', { name: 'Hydration' })
+    expect(screen.getAllByRole('region')).toHaveLength(7)
+    await waitFor(() => expect(screen.getByRole('region', { name: 'HRV' })).toHaveAttribute('aria-busy', 'false'))
+    expect(screen.getByRole('group', { name: 'Sleep duration over seven days' })).toBeInTheDocument()
+    expect(screen.getAllByRole('img').length).toBeGreaterThan(0)
+    Object.values(healthLoaders).forEach((load) => expect(load).toHaveBeenCalledTimes(1))
+    expect(getGarminActivities).not.toHaveBeenCalled()
+    for (const name of ['Heart rate', 'Body Battery', 'Fitness age', 'Recent activities']) expect(screen.queryByRole('region', { name })).not.toBeInTheDocument()
   })
 
-  it.each([
-    ['/recovery', 'Recovery.', ['Sleep', 'Body Battery', 'Stress', 'HRV'], ['body-battery', 'stress', 'hrv'], true, false, false],
-    ['/activities', 'Activities.', ['Recent activities'], [], false, true, false],
-    ['/health', 'Health.', ['Heart rate', 'Weight', 'Hydration', 'Fitness age'], ['heart-rate', 'weight', 'hydration', 'fitness-age'], false, false, false],
-    ['/movement', 'Movement.', ['Daily steps', 'Weekly movement'], ['movement'], false, false, true],
-  ])('opens %s directly and requests only the data used by that tab', async (path, heading, panels, resources, sleep, activities, steps) => {
-    open(path)
-    expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
-    for (const name of panels) expect(screen.getByRole('region', { name })).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByRole('region', { name: panels[0] })).toHaveAttribute('aria-busy', 'false'))
+  it('loads only activities when opening Activities directly, regardless of hidden dashboard panels', async () => {
+    open('/activities')
+    expect(screen.getByRole('heading', { name: 'Activities.' })).toBeInTheDocument()
+    await waitFor(() => expect(getGarminActivities).toHaveBeenCalledTimes(1))
+    expect(screen.getAllByRole('region')).toHaveLength(1)
     expect(getPanelPreferences).not.toHaveBeenCalled()
-    expect(getGarminSleep).toHaveBeenCalledTimes(sleep ? 1 : 0)
-    expect(getGarminActivities).toHaveBeenCalledTimes(activities ? 1 : 0)
-    expect(getGarminSteps).toHaveBeenCalledTimes(steps ? 1 : 0)
-    Object.entries(healthLoaders).forEach(([id, load]) => expect(load).toHaveBeenCalledTimes(resources.includes(id) ? 1 : 0))
-    expect(navigation().getByRole('link', { name: heading.slice(0, -1) })).toHaveAttribute('aria-current', 'page')
-    expect(screen.queryByText('Manage panels')).not.toBeInTheDocument()
+    expect(getGarminSteps).not.toHaveBeenCalled()
+    expect(getGarminSleep).not.toHaveBeenCalled()
+    Object.values(healthLoaders).forEach((load) => expect(load).not.toHaveBeenCalled())
+    expect(navigation().getByRole('link', { name: 'Activities' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('remembers separate tab dates and carries the summary date into a linked detail tab', async () => {
+  it.each(['/recovery', '/health', '/movement'])('redirects old %s links and retains their date and anchor', async (path) => {
+    open(`${path}?date=2026-01-02#sleep`)
+    await screen.findByRole('region', { name: 'Sleep' })
+    expect(window.location.pathname).toBe('/')
+    expect(window.location.search).toBe('?date=2026-01-02')
+    expect(window.location.hash).toBe('#sleep')
+    expect(screen.getByLabelText('Calendar date')).toHaveValue('2026-01-02')
+  })
+
+  it('remembers separate dates for the dashboard and activities', async () => {
     const user = userEvent.setup()
     open()
     await screen.findByRole('region', { name: 'Sleep' })
     fireEvent.change(screen.getByLabelText('Calendar date'), { target: { value: '2026-01-02' } })
-    await user.click(screen.getByRole('link', { name: /View sleep in Recovery/ }))
-    expect(await screen.findByRole('heading', { name: 'Recovery.' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Calendar date')).toHaveValue('2026-01-02')
-    expect(window.location.hash).toBe('#sleep')
-    await user.click(navigation().getByRole('link', { name: 'Health' }))
+    await user.click(navigation().getByRole('link', { name: 'Activities' }))
     expect(screen.getByLabelText('Calendar date')).toHaveValue(localDate())
     fireEvent.change(screen.getByLabelText('Calendar date'), { target: { value: '2026-02-03' } })
-    await user.click(navigation().getByRole('link', { name: 'Recovery' }))
+    await user.click(navigation().getByRole('link', { name: 'Dashboard' }))
     expect(screen.getByLabelText('Calendar date')).toHaveValue('2026-01-02')
-    await user.click(navigation().getByRole('link', { name: 'Health' }))
+    await user.click(navigation().getByRole('link', { name: 'Activities' }))
     expect(screen.getByLabelText('Calendar date')).toHaveValue('2026-02-03')
   })
 
-  it('exposes full tabs when Overview summaries are all hidden', async () => {
+  it('keeps Activities accessible with every dashboard panel hidden', async () => {
     const user = userEvent.setup()
     getPanelPreferences.mockResolvedValue({ preferences: { visible_panels: [] } })
     open()
-    expect(await screen.findByText(/No overview summaries selected/)).toBeInTheDocument()
+    expect(await screen.findByText(/No dashboard panels selected/)).toBeInTheDocument()
     expect(getGarminSleep).not.toHaveBeenCalled()
-    await user.click(navigation().getByRole('link', { name: 'Recovery' }))
-    expect(screen.getByRole('region', { name: 'Sleep' })).toBeInTheDocument()
-    expect(getGarminSleep).toHaveBeenCalledTimes(1)
+    await user.click(navigation().getByRole('link', { name: 'Activities' }))
+    expect(screen.getByRole('region', { name: 'Recent activities' })).toBeInTheDocument()
+    expect(getGarminActivities).toHaveBeenCalledTimes(1)
   })
 
-  it('aborts reads from a tab that was closed and ignores late data', async () => {
+  it('aborts dashboard reads on navigation and ignores late data', async () => {
     const user = userEvent.setup()
     let finish, signal
     healthLoaders.weight.mockImplementationOnce((_, options) => { signal = options.signal; return new Promise((resolve) => { finish = resolve }) })
-    open('/health')
-    expect(screen.getByRole('region', { name: 'Weight' })).toHaveAttribute('aria-busy', 'true')
+    open()
+    await screen.findByRole('region', { name: 'Weight' })
     await user.click(navigation().getByRole('link', { name: 'Activities' }))
     expect(signal.aborted).toBe(true)
     await act(async () => finish(response({ dailyWeightSummaries: [] })))
     expect(screen.queryByRole('region', { name: 'Weight' })).not.toBeInTheDocument()
   })
 
-  it('ignores an invalid date deep link and keeps demo tabs offline', async () => {
-    open('/recovery?date=2026-02-30')
+  it('ignores invalid deep-link dates and keeps demo tabs offline', async () => {
+    open('/?date=2026-02-30')
     expect(screen.getByLabelText('Calendar date')).toHaveValue(localDate())
     cleanup()
     vi.clearAllMocks()
     auth.user = { accountId: 'demo', isDemo: true }
-    open('/health')
+    open('/activities')
     expect(screen.getByText(/This demo does not contact Garmin/)).toBeInTheDocument()
     expect(getPanelPreferences).not.toHaveBeenCalled()
+    expect(getGarminActivities).not.toHaveBeenCalled()
     Object.values(healthLoaders).forEach((load) => expect(load).not.toHaveBeenCalled())
   })
 })

@@ -1,11 +1,8 @@
 import { NavLink } from 'react-router-dom'
 
 const items = [
-  { to: '/', label: 'Overview', icon: '◈', end: true },
-  { to: '/recovery', label: 'Recovery', icon: '☾' },
+  { to: '/', label: 'Dashboard', icon: '◈', end: true },
   { to: '/activities', label: 'Activities', icon: '↗' },
-  { to: '/health', label: 'Health', icon: '♡' },
-  { to: '/movement', label: 'Movement', icon: '⌁' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
 

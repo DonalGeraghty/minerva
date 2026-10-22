@@ -25,14 +25,11 @@ async function view(name) {
 }
 function fixtureData() {
   return {
-    'body-battery': { reports: [{ date: day, charged: 70, drained: 35, bodyBatteryValueDescriptorDTOList: [{ bodyBatteryValueDescriptorIndex: 1, bodyBatteryValueDescriptorKey: 'timestamp' }, { bodyBatteryValueDescriptorIndex: 0, bodyBatteryValueDescriptorKey: 'bodyBatteryLevel' }], bodyBatteryValuesArray: [[80, 1792627200000], [-1, 1792627260000], [40, 1792627320000]] }], summary: { bodyBatteryAtWakeTime: 82, bodyBatteryMostRecentValue: 40 } },
-    'heart-rate': { daily: { restingHeartRate: 53, lastSevenDaysAvgRestingHeartRate: 54, minHeartRate: 48, maxHeartRate: 150, heartRateValueDescriptors: [{ index: 0, key: 'timestamp' }, { index: 1, key: 'heartrate' }], heartRateValues: [[1792627200000, 60], [1792627260000, -1], [1792627320000, 90]] }, history: [{ calendarDate: day, heartRate: { restingValue: 53 } }] },
     stress: [{ calendarDate: day, stress: { avgLevel: 35, maxLevel: 70, qualifier: 'calm', highStressDurationInMillis: 3600000 } }],
     hrv: [{ calendarDate: day, lastNightAvg: 58, weeklyAvg: 56, status: 'BALANCED', baseline: { balancedLow: 35, balancedUpper: 65 } }],
     movement: [{ calendarDate: daysBefore(day, 1), movement: { steps: { value: 1000, distanceInMeters: 750 }, floorsAscended: { value: 2 } } }, { calendarDate: day, movement: JSON.stringify({ steps: { value: 2000, distanceInMeters: 1500 }, floorsAscended: { value: 3 } }), intensityMinutes: { moderate: 15, vigorous: 5 } }],
     weight: { dailyWeightSummaries: [{ summaryDate: day, latestWeight: { weight: 70.25, bmi: 23.4, bodyFat: 20.5 } }], totalAverage: { weight: 71 } },
     hydration: [{ calendarDate: day, valueInML: 1500, goalInML: 2000 }],
-    'fitness-age': [{ fitnessAge: 28, chronologicalAge: 30, achievableFitnessAge: 26, lastUpdated: day, components: { restingHeartRate: { value: 53, targetValue: 50, stale: true } } }],
   }
 }
 
@@ -52,19 +49,11 @@ afterEach(cleanup)
 
 describe('Expanded Garmin dashboard', () => {
   it('shows all health panels using recorded values and documented units', async () => {
-    show('recovery')
-    expect((await view('Body Battery')).getByText('82')).toBeInTheDocument()
+    show()
     expect((await view('Stress')).getByText('60 min')).toBeInTheDocument()
-    expect((await view('HRV')).getByText('35–65 ms')).toBeInTheDocument()
-    cleanup()
-    show('health')
-    expect((await view('Heart rate')).getByText('53 bpm', { selector: 'dd' })).toBeInTheDocument()
+    expect((await view('HRV')).getByText(/35.*65 ms/)).toBeInTheDocument()
     expect((await view('Weight')).getByText('70.25 kg', { selector: 'dd' })).toBeInTheDocument()
     expect((await view('Hydration')).getByRole('progressbar')).toHaveAttribute('value', '1500')
-    expect((await view('Fitness age')).getByText('28 years')).toBeInTheDocument()
-    expect(screen.getByText('Older measurement')).toBeInTheDocument()
-    cleanup()
-    show('movement')
     expect((await view('Weekly movement')).getByText('3,000')).toBeInTheDocument()
     expect((await view('Weekly movement')).getByText('2.25 km')).toBeInTheDocument()
     expect(getActivityDetail).not.toHaveBeenCalled()
@@ -83,25 +72,25 @@ describe('Expanded Garmin dashboard', () => {
     expect(screen.queryByRole('region', { name: 'Daily steps' })).not.toBeInTheDocument()
     expect(healthLoaders.weight).not.toHaveBeenCalled()
     await user.click(screen.getByText('Manage panels'))
-    await user.click(screen.getByRole('checkbox', { name: 'Body Battery' }))
-    await view('Body Battery')
+    await user.click(screen.getByRole('checkbox', { name: 'Hydration' }))
+    await view('Hydration')
     await user.click(screen.getByRole('button', { name: 'Save panel choices' }))
-    expect(savePanelPreferences).toHaveBeenCalledWith(['sleep', 'hrv', 'body-battery'])
+    expect(savePanelPreferences).toHaveBeenCalledWith(['sleep', 'hrv', 'hydration'])
     expect(await screen.findByText('Panel choices saved to your account.')).toBeInTheDocument()
   })
 
   it('keeps sibling cards available on failure and refreshes only the failed panel', async () => {
     const user = userEvent.setup()
     healthLoaders.hrv.mockRejectedValueOnce(new ApiError('No HRV available.', 502, 'garmin_unavailable'))
-    show('recovery')
+    show()
     const hrv = await view('HRV')
     expect(hrv.getByRole('alert')).toHaveTextContent('No HRV available.')
-    expect((await view('Body Battery')).getByText('82')).toBeInTheDocument()
+    expect((await view('Hydration')).getByText('1,500 ml', { selector: 'dd' })).toBeInTheDocument()
     await user.click(hrv.getByRole('button', { name: 'Refresh hrv' }))
     expect(await hrv.findByText('58 ms', { selector: 'dd' })).toBeInTheDocument()
     expect(healthLoaders.hrv).toHaveBeenLastCalledWith(day, expect.objectContaining({ refresh: true }))
-    expect(healthLoaders['body-battery']).toHaveBeenCalledTimes(1)
-    expect(healthLoaders.weight).not.toHaveBeenCalled()
+    expect(healthLoaders['hydration']).toHaveBeenCalledTimes(1)
+    expect(healthLoaders.weight).toHaveBeenCalledTimes(1)
     expect(auth.logout).not.toHaveBeenCalled()
   })
 
@@ -112,17 +101,17 @@ describe('Expanded Garmin dashboard', () => {
     show()
     await view('Sleep')
     await user.click(screen.getByText('Manage panels'))
-    await user.click(screen.getByRole('checkbox', { name: 'Body Battery' }))
-    await view('Body Battery')
+    await user.click(screen.getByRole('checkbox', { name: 'Hydration' }))
+    await view('Hydration')
     await user.click(screen.getByRole('button', { name: 'Save panel choices' }))
     expect(await screen.findByText(/Could not save panel choices/)).toBeInTheDocument()
-    expect(screen.getByRole('checkbox', { name: 'Body Battery' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Hydration' })).toBeChecked()
     cleanup()
-    healthLoaders['body-battery'].mockClear()
+    healthLoaders['hydration'].mockClear()
     show()
     await view('Sleep')
-    expect(screen.queryByRole('region', { name: 'Body Battery' })).not.toBeInTheDocument()
-    expect(healthLoaders['body-battery']).not.toHaveBeenCalled()
+    expect(screen.queryByRole('region', { name: 'Hydration' })).not.toBeInTheDocument()
+    expect(healthLoaders['hydration']).not.toHaveBeenCalled()
   })
 
   it('ignores late preferences from an account that is no longer signed in', async () => {
@@ -130,22 +119,20 @@ describe('Expanded Garmin dashboard', () => {
     getPanelPreferences.mockImplementationOnce(() => new Promise((resolve) => { finishOld = resolve }))
     const app = show()
     auth.user = { accountId: 'two' }
-    getPanelPreferences.mockResolvedValue({ preferences: { visible_panels: ['body-battery'] } })
+    getPanelPreferences.mockResolvedValue({ preferences: { visible_panels: ['hydration'] } })
     app.rerender(<MemoryRouter><GarminPage /></MemoryRouter>)
-    await view('Body Battery')
+    await view('Hydration')
     await act(async () => finishOld({ preferences: { visible_panels: ['sleep'] } }))
     expect(screen.queryByRole('region', { name: 'Sleep' })).not.toBeInTheDocument()
     expect(healthLoaders.hrv).not.toHaveBeenCalled()
   })
 
-  it('handles empty measurements and unavailable fitness age without invented readings', async () => {
+  it('handles empty measurements without invented readings', async () => {
     Object.values(healthLoaders).forEach((load) => load.mockResolvedValue(envelope(null)))
-    healthLoaders['fitness-age'].mockResolvedValue(envelope([{ invalidReason: 'USER_EMPTY_AGE' }]))
-    show('health')
+    show()
     const weight = await view('Weight')
     expect(weight.getByText('No weight measurements in this 28-day window.')).toBeInTheDocument()
     expect(weight.getAllByText('Unavailable').length).toBeGreaterThan(0)
-    expect((await view('Fitness age')).getByText('Fitness age unavailable: User Empty Age.')).toBeInTheDocument()
     expect(document.body.textContent).not.toMatch(/NaN|Infinity/)
   })
 

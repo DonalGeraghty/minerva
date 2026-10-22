@@ -3,7 +3,6 @@ import { waitFor } from '@testing-library/react'
 import { apiRequest } from './request.js'
 import { healthLoaders, getActivityDetail, getPanelPreferences, savePanelPreferences } from './garminHealth.js'
 import { queuedGarminRequest } from './garminQueue.js'
-import { timeline } from './garminMetrics.js'
 
 vi.mock('./request.js', () => ({ apiRequest: vi.fn() }))
 beforeEach(() => { vi.resetAllMocks(); apiRequest.mockResolvedValue({}) })
@@ -14,7 +13,7 @@ describe('Garmin health requests', () => {
       await load('2026-10-22')
       const query = new URLSearchParams(apiRequest.mock.lastCall[0].split('?')[1])
       expect(query.get('end')).toBe('2026-10-22')
-      expect(query.get('start')).toBe(['body-battery', 'heart-rate', 'fitness-age'].includes(resource) ? '2026-10-22' : resource === 'weight' ? '2026-09-25' : '2026-10-16')
+      expect(query.get('start')).toBe(resource === 'weight' ? '2026-09-25' : '2026-10-16')
       await load('2026-10-22', { refresh: true })
       expect(JSON.parse(apiRequest.mock.lastCall[1].body).resources).toEqual([resource])
     }
@@ -44,8 +43,7 @@ describe('Garmin health requests', () => {
     await Promise.all([first, second, fourth])
   })
 
-  it('reads descriptor indices and preserves missing timeline samples as gaps', () => {
-    expect(timeline([[60, 1792627200000], [-1, 1792627260000], [0, 1792627320000]], [{ index: 1, key: 'timestamp' }, { index: 0, key: 'heartrate' }], 'heartrate').map((point) => point.value)).toEqual([60, null, 0])
-    expect(timeline([[1792627200000, 60]], [], 'heartrate')).toEqual([])
+  it('has no loaders for retired panels', () => {
+    for (const resource of ['heart-rate', 'body-battery', 'fitness-age']) expect(healthLoaders[resource]).toBeUndefined()
   })
 })

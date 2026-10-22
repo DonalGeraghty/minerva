@@ -41,7 +41,7 @@ export default function GarminConnectionSettings() {
       const result = remove ? await disconnectGarmin(controller.signal) : await saveGarminConnection(submittedKey, controller.signal)
       if (!controller.signal.aborted) {
         setConnection(result.connection)
-        setMessage({ text: remove ? 'Garmin disconnected. Saved history is retained.' : 'Garmin connected. Open Overview to view your data.' })
+        setMessage({ text: remove ? 'Garmin disconnected. Saved history is retained.' : 'Garmin connected. Open Dashboard to view your data.' })
       }
     } catch (error) {
       if (controller.signal.aborted) return
