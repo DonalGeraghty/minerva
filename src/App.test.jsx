@@ -5,7 +5,7 @@ import { getGarminSteps } from './services/garmin.js'
 
 const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one' }, logout: vi.fn() } }))
 vi.mock('./context/AuthContext.jsx', () => ({ useAuth: () => auth }))
-vi.mock('./services/garmin.js', async (original) => ({ ...await original(), getGarminSteps: vi.fn(async () => ({ data: [], meta: { source: 'cache', fetched_at: 1, fresh_until: 2 } })) }))
+vi.mock('./services/garmin.js', async (original) => ({ ...await original(), getGarminSteps: vi.fn(async () => ({ data: [], meta: { source: 'cache', fetched_at: 1, fresh_until: 2 } })), getGarminSleep: vi.fn(async () => ({ data: null, meta: { source: 'cache', fetched_at: 1, fresh_until: 2 } })), getGarminActivities: vi.fn(async () => ({ data: [], meta: { source: 'cache', fetched_at: 1, fresh_until: 2 } })) }))
 vi.mock('./pages/AccountPage.jsx', () => ({ default: () => <div>Account settings</div> }))
 
 afterEach(() => { cleanup(); vi.clearAllMocks() })

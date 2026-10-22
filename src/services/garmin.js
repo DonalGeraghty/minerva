@@ -23,6 +23,29 @@ export function getGarminSteps(date, { refresh = false, signal } = {}) {
   return apiRequest(`/api/garmin/data/steps?${new URLSearchParams({ start: date, end: date })}`, { signal })
 }
 
+export function getGarminSleep(date, { refresh = false, signal } = {}) {
+  if (refresh) return apiRequest('/api/garmin/refresh', {
+    method: 'POST', signal, headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resources: ['sleep'], start: date, end: date }),
+  })
+  return apiRequest(`/api/garmin/data/sleep?${new URLSearchParams({ date })}`, { signal })
+}
+
+export function daysBefore(date, days) {
+  const value = new Date(`${date}T00:00:00Z`)
+  value.setUTCDate(value.getUTCDate() - days)
+  return value.toISOString().slice(0, 10)
+}
+
+export function getGarminActivities(date, { refresh = false, signal } = {}) {
+  const parameters = { start: daysBefore(date, 27), end: date, limit: 5 }
+  if (refresh) return apiRequest('/api/garmin/refresh', {
+    method: 'POST', signal, headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resources: ['activities'], ...parameters }),
+  })
+  return apiRequest(`/api/garmin/data/activities?${new URLSearchParams(parameters)}`, { signal })
+}
+
 export function localDate(value = new Date()) {
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
 }

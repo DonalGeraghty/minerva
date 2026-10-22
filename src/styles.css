@@ -197,6 +197,24 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .garmin-panel summary { cursor: pointer; }
 .garmin-panel pre { overflow: auto; max-height: 20rem; padding: 1rem; background: #080808; }
 .garmin-panel button:disabled { opacity: .55; cursor: wait; }
+.garmin-date-controls { display: flex; margin-bottom: 1.5rem; }
+.garmin-date-controls label { display: grid; gap: .5rem; color: var(--soft); font-size: .8rem; }
+.garmin-date-controls input { min-height: 2.8rem; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: #090909; color: var(--text); color-scheme: dark; }
+.garmin-overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; align-items: start; }
+.garmin-card { min-width: 0; margin-bottom: 0; }
+.garmin-activities-card { grid-column: 1 / -1; }
+.garmin-card-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
+.garmin-card-toolbar p { flex: 1 1 12rem; margin: 0; font-size: .8rem; }
+.garmin-sleep-stages, .garmin-activity-list dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
+.garmin-card dt { color: var(--muted); font-size: .75rem; }
+.garmin-card dd { margin: .4rem 0 0; color: var(--text); font-size: .9rem; }
+.garmin-activity-list { list-style: none; padding: 0; margin: 1rem 0; }
+.garmin-activity-list li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem 2rem; padding: 1.2rem 0; border-bottom: 1px solid var(--line); }
+.garmin-activity-list li > div { flex: 1 1 15rem; min-width: 0; }
+.garmin-activity-list h3 { margin: 0; font-size: 1rem; font-weight: 500; overflow-wrap: anywhere; }
+.garmin-activity-list p { margin: .4rem 0 0; color: var(--muted); font-size: .8rem; }
+.garmin-activity-list dl { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; min-width: 13rem; }
+@media (max-width: 46rem) { .garmin-overview-grid { grid-template-columns: minmax(0, 1fr); } .garmin-sleep-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

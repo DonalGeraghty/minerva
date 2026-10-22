@@ -41,7 +41,7 @@ export default function GarminConnectionSettings() {
       const result = remove ? await disconnectGarmin(controller.signal) : await saveGarminConnection(submittedKey, controller.signal)
       if (!controller.signal.aborted) {
         setConnection(result.connection)
-        setMessage({ text: remove ? 'Garmin disconnected. Saved history is retained.' : 'Garmin connected. Open Overview to view your steps.' })
+        setMessage({ text: remove ? 'Garmin disconnected. Saved history is retained.' : 'Garmin connected. Open Overview to view your data.' })
       }
     } catch (error) {
       if (controller.signal.aborted) return
@@ -53,7 +53,7 @@ export default function GarminConnectionSettings() {
   return <section className="garmin-panel" aria-labelledby="garmin-connection-title">
     <header><div><p className="eyebrow">Connections</p><h2 id="garmin-connection-title">Garmin.</h2></div><span className="garmin-badge">{user?.isDemo ? 'Demo' : busy ? 'Working…' : connection?.configured ? 'Connected' : connection ? 'Not connected' : 'Unavailable'}</span></header>
     {user?.isDemo ? <p>Connect a real Janus account to link Garmin. Demo mode never sends Garmin credentials.</p> : <>
-      <p>Connect your personal Garmin key to view your steps. Your key is encrypted by Janus and is never returned to this browser.</p>
+      <p>Connect your personal Garmin key to view your steps, sleep, and activities. Your key is encrypted by Janus and is never returned to this browser.</p>
       <p><a href="https://connect.garmin.com/app/settings/personalApiToken" target="_blank" rel="noreferrer">Create a Garmin personal API key ↗</a></p>
       {connection?.configured && <p>Saved key ending in <strong>{connection.last_four}</strong>. {connection.verified_at && <>Verified <time dateTime={connection.verified_at}>{new Date(connection.verified_at).toLocaleString()}</time>.</>}</p>}
       {connection?.reconnect_required && <p className="settings-message is-error">Garmin needs a replacement key. Your Janus login is still active.</p>}
