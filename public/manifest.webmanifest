@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Minerva",
   "short_name": "Minerva",
-  "description": "AI-assisted flashcards and active-recall study.",
+  "description": "Your personal Garmin dashboard with daily movement and clear update times.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

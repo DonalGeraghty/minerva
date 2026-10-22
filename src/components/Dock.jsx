@@ -2,9 +2,6 @@ import { NavLink } from 'react-router-dom'
 
 const items = [
   { to: '/', label: 'Overview', icon: '◈', end: true },
-  { to: '/ask', label: 'Ask', icon: '✦' },
-  { to: '/flashcards', label: 'Flashcards', icon: '▱' },
-  { to: '/gallery', label: 'Gallery', icon: '▦' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
 

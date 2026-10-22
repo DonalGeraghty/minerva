@@ -1,10 +1,10 @@
 # Garmin dashboard implementation plan
 
-Status: first milestone implemented locally (secure connection, cached steps, and Account/Overview UI); full dashboard implementation remains in progress. Live Garmin/Google Cloud verification and deployment are outstanding. This plan covers repurposing Minerva and adding Garmin integration in the sibling Janus API repository. It supersedes the earlier proposal to add a Garmin tab to Aether.
+Status: connection and steps milestone deployed and verified by the user. Study UI and related backend endpoints are now retired locally; full Garmin endpoint coverage remains planned. This plan covers repurposing Minerva and adding Garmin integration in the sibling Janus API repository. It supersedes the earlier proposal to add a Garmin tab to Aether.
 
 ### First milestone delivered
 
-The current frontend has Garmin Overview at `/`, connection controls in Account, and retained legacy features at `/ask` and `/flashcards`. Janus implements connection GET/PUT/DELETE, steps GET, and steps-only POST refresh, with encrypted key/token persistence, generation checks, account deletion cleanup, bounded date ranges, refresh locking/backoff, and stale-data fallback. Synthetic integration and UI tests exercise this path. Saved dashboard preferences, other resources, Garmin-only cache clearing, and the complete flashcard UI replacement remain future work in this plan.
+The current frontend has Garmin Overview at `/` and connection controls in Account. Legacy study URLs redirect to Overview. Janus implements connection GET/PUT/DELETE, steps GET, and steps-only POST refresh, with encrypted key/token persistence, generation checks, account deletion cleanup, bounded date ranges, refresh locking/backoff, and stale-data fallback. Synthetic integration and UI tests exercise this path. Saved dashboard preferences, other resources, and Garmin-only cache clearing remain future work in this plan. Ask, Flashcards, Gallery, scheduling/drafting code, and card-context endpoints have been removed; historical records retain account-deletion cleanup.
 
 ## 1. Scope and agreed behaviour
 
@@ -119,7 +119,7 @@ The resource registry maps only known Garmin paths and query parameters. Do not 
 - Add a Manage overview control with labelled visibility toggles, keyboard-accessible ordering controls, save feedback, and Reset to defaults. Persist preferences in Firestore through Janus; keep unsaved edits visible if saving fails and offer retry.
 - Expose every data section regardless of overview choices, with date controls, readable units, suitable charts/tables, expandable returned-field inspection, and file downloads where supported. Label the raw response view as an optional detail tool.
 - Remove flashcard creation/review/search and flashcard-context controls from the active Minerva interface. Replace flashcard-focused login copy and demo fixtures with Garmin dashboard examples; demo mode must remain isolated and excluded from production builds.
-- Retain existing server-side flashcards and review history. Replacing the frontend must not delete records or retire Janus flashcard endpoints as a side effect. Preserve local legacy card data during the transition; evaluate its removal separately.
+- Retain historical server-side flashcards and review history until explicit account deletion. The user explicitly authorised endpoint retirement after verifying Garmin: remove the study APIs and active implementation, retaining only account-deletion cleanup. Preserve old browser storage without reading or writing it.
 - Preserve shared Janus login, account identity, AI-provider credentials/model settings, and account controls. Explain that deleting the shared Janus account removes its data across Minerva, Aether, and Nyx; a Garmin-only clear-data action must not do so.
 - Keep Aether habit workflows and Nyx nutrition workflows working. Automatic habit completion and Garmin-to-AI analysis are later features requiring explicit user choices; the first release is a complete data dashboard.
 
