@@ -15,6 +15,7 @@ vi.mock('../context/AuthContext.jsx', () => ({
   }),
 }))
 vi.mock('../components/AISettings.jsx', () => ({ default: () => <div>AI settings</div> }))
+vi.mock('../components/GarminConnectionSettings.jsx', () => ({ default: () => <div>Garmin settings</div> }))
 vi.mock('../services/minervaSettings.js', () => ({
   getMinervaSettings: vi.fn(),
   saveMinervaSettings: vi.fn(),

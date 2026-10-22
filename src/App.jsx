@@ -6,12 +6,13 @@ import AccountPage from './pages/AccountPage.jsx'
 import AskPage from './pages/AskPage.jsx'
 import FlashcardsPage from './pages/FlashcardsPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
+import GarminPage from './pages/GarminPage.jsx'
 
 function ProtectedLayout() {
   const { user, loading, logout } = useAuth()
   if (loading) return <main className="auth-loading" role="status"><span className="brand-mark" aria-hidden="true">M</span><p>Restoring your Minerva session…</p></main>
   if (!user) return <LoginSplash />
-  return <div className="app-shell"><AmbientBackground /><Outlet /><Dock onLogout={logout} /></div>
+  return <div className="app-shell" key={user.accountId}><AmbientBackground /><Outlet /><Dock onLogout={logout} /></div>
 }
 
 export default function App() {
@@ -19,7 +20,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<ProtectedLayout />}>
-          <Route path="/" element={<AskPage />} />
+          <Route path="/" element={<GarminPage />} />
+          <Route path="/ask" element={<AskPage />} />
           <Route path="/flashcards" element={<FlashcardsPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -272,6 +272,28 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
   .provider-key-input-row { grid-template-columns: 1fr; }
   .danger-card { margin-top: 3rem; }
 }
+.garmin-hero { padding: clamp(4rem, 10vh, 7rem) 0 2.5rem; }
+.garmin-hero h1 { margin: 0; font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 500; letter-spacing: -.07em; line-height: 1; }
+.garmin-hero > p:last-child { max-width: 38rem; color: var(--muted); line-height: 1.7; }
+.garmin-panel { margin-bottom: 1.5rem; padding: clamp(1.2rem, 4vw, 2rem); border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+.garmin-panel > header, .garmin-controls, .garmin-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+.garmin-panel h2 { margin: 0; font-size: 1.65rem; font-weight: 500; letter-spacing: -.03em; }
+.garmin-panel p { color: var(--soft); line-height: 1.6; }
+.garmin-panel a { color: var(--gold); text-underline-offset: .2em; }
+.garmin-badge { padding: .35rem .65rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .7rem; }
+.garmin-panel form, .garmin-panel label { display: grid; gap: .7rem; }
+.garmin-panel label { color: var(--muted); font-size: .8rem; }
+.garmin-panel input { width: 100%; min-height: 2.8rem; padding: .7rem; border: 1px solid var(--line); border-radius: .5rem; color: var(--text); background: #090909; color-scheme: dark; }
+.garmin-controls { margin-top: 1.5rem; align-items: flex-end; }
+.garmin-actions { justify-content: flex-start; }
+.garmin-panel .garmin-step-total { margin: 1.5rem 0 0; color: var(--text); font-size: clamp(3rem, 10vw, 5rem); letter-spacing: -.05em; }
+.garmin-step-total span { color: var(--muted); font-size: 1rem; letter-spacing: normal; }
+.garmin-freshness { display: flex; gap: .6rem 1.5rem; flex-wrap: wrap; font-size: .8rem; }
+.garmin-panel details { margin-top: 1.5rem; color: var(--muted); font-size: .8rem; }
+.garmin-panel summary { cursor: pointer; }
+.garmin-panel pre { overflow: auto; max-height: 20rem; padding: 1rem; background: #080808; }
+.garmin-panel button:disabled { opacity: .55; cursor: wait; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

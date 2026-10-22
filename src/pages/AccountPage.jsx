@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AISettings from '../components/AISettings.jsx'
 import Brand from '../components/Brand.jsx'
+import GarminConnectionSettings from '../components/GarminConnectionSettings.jsx'
 import MinervaContextSettings from '../components/MinervaContextSettings.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -30,9 +31,10 @@ export default function AccountPage() {
     <main className="page account-page">
       <Brand />
       <section className="account-hero"><div><p className="eyebrow">Identity · connections</p><h1>Account.</h1></div><div className="account-identity"><span>Signed in as</span><strong>{user?.email}</strong><Link to="/">← Back to Minerva</Link></div></section>
+      <GarminConnectionSettings key={user?.accountId} />
       <AISettings />
       <MinervaContextSettings />
-      {user?.isDemo ? <section className="demo-account-note"><p className="settings-kicker">Local demo</p><h2>Safe to explore.</h2><p>Cards are kept only in this browser. Sign out to return to the normal Minerva sign-in screen.</p></section> : <section className="danger-card" aria-labelledby="danger-heading"><div><p className="settings-kicker">Danger zone</p><h2 id="danger-heading">Delete account.</h2><p>This permanently removes the shared Janus account and its cards, nutrition entries, workouts, and encrypted AI connections.</p></div><form onSubmit={removeAccount}><label htmlFor="delete-password">Confirm with your password</label><input id="delete-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Current password" disabled={busy} />{error && <p className="settings-message is-error" role="alert">{error}</p>}<button className="secondary-button" type="submit" disabled={busy}>{busy ? 'Deleting…' : 'Delete my account'}</button></form></section>}
+      {user?.isDemo ? <section className="demo-account-note"><p className="settings-kicker">Local demo</p><h2>Safe to explore.</h2><p>Cards are kept only in this browser. Sign out to return to the normal Minerva sign-in screen.</p></section> : <section className="danger-card" aria-labelledby="danger-heading"><div><p className="settings-kicker">Danger zone</p><h2 id="danger-heading">Delete account.</h2><p>This permanently removes the shared Janus account and its cards, nutrition entries, workouts, Garmin data, and encrypted connections.</p></div><form onSubmit={removeAccount}><label htmlFor="delete-password">Confirm with your password</label><input id="delete-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Current password" disabled={busy} />{error && <p className="settings-message is-error" role="alert">{error}</p>}<button className="secondary-button" type="submit" disabled={busy}>{busy ? 'Deleting…' : 'Delete my account'}</button></form></section>}
     </main>
   )
 }
