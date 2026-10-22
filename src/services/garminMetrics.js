@@ -21,14 +21,3 @@ export function sum(values) {
 }
 
 export function scaled(value, factor) { return number(value) === null ? null : value * factor }
-
-export function timeline(rows, descriptors, key, indexField = 'index', keyField = 'key') {
-  if (!Array.isArray(rows) || !Array.isArray(descriptors)) return []
-  const normalized = (value) => typeof value === 'string' ? value.toLowerCase().replace(/[^a-z]/g, '') : ''
-  const timestamp = descriptors.find((item) => normalized(item?.[keyField]) === 'timestamp')?.[indexField]
-  const measurement = descriptors.find((item) => normalized(item?.[keyField]) === normalized(key))?.[indexField]
-  if (!Number.isInteger(timestamp) || timestamp < 0 || !Number.isInteger(measurement) || measurement < 0) return []
-  return rows.filter((row) => Array.isArray(row) && number(row[timestamp]) !== null && Number.isFinite(new Date(row[timestamp]).getTime())).map((row) => ({
-    x: row[timestamp], label: new Date(row[timestamp]).toISOString().slice(11, 16), value: number(row[measurement]),
-  })).sort((a, b) => a.x - b.x)
-}

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import AmbientBackground from './components/AmbientBackground.jsx'
 import Dock from './components/Dock.jsx'
 import { useAuth } from './context/AuthContext.jsx'
@@ -14,16 +14,19 @@ function ProtectedLayout() {
   return <div className="app-shell" key={user.accountId}><AmbientBackground /><GarminDatesProvider key={user.accountId}><Outlet /></GarminDatesProvider><Dock /></div>
 }
 
+function DashboardRedirect() {
+  const { search, hash } = useLocation()
+  return <Navigate to={{ pathname: '/', search, hash }} replace />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<GarminPage />} />
-          <Route path="/recovery" element={<GarminPage tab="recovery" />} />
           <Route path="/activities" element={<GarminPage tab="activities" />} />
-          <Route path="/health" element={<GarminPage tab="health" />} />
-          <Route path="/movement" element={<GarminPage tab="movement" />} />
+          {['recovery', 'health', 'movement'].map((path) => <Route key={path} path={`/${path}`} element={<DashboardRedirect />} />)}
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

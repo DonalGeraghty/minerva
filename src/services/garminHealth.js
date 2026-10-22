@@ -3,15 +3,14 @@ import { queuedGarminRequest } from './garminQueue.js'
 import { daysBefore } from './garmin.js'
 
 export const healthPanels = [
-  ['body-battery', 'Body Battery'], ['heart-rate', 'Heart rate'], ['stress', 'Stress'], ['hrv', 'HRV'],
-  ['movement', 'Weekly movement'], ['weight', 'Weight'], ['hydration', 'Hydration'], ['fitness-age', 'Fitness age'],
+  ['stress', 'Stress'], ['hrv', 'HRV'], ['movement', 'Weekly movement'],
+  ['weight', 'Weight'], ['hydration', 'Hydration'],
 ]
-export const allPanels = [['steps', 'Daily steps'], ['sleep', 'Sleep'], ['activities', 'Recent activities'], ...healthPanels]
-export const defaultPanels = allPanels.map(([id]) => id)
-export const overviewPanels = [['steps', 'Daily steps'], ['sleep', 'Sleep'], ['body-battery', 'Body Battery'], ['heart-rate', 'Heart rate'], ['activities', 'Latest activity']]
+export const dashboardPanels = [['steps', 'Daily steps'], ['sleep', 'Sleep'], ...healthPanels]
+export const defaultPanels = dashboardPanels.map(([id]) => id)
 
 export const healthLoaders = Object.fromEntries(healthPanels.map(([resource]) => [resource, (date, { refresh = false, signal } = {}) => {
-  const days = ['body-battery', 'heart-rate', 'fitness-age'].includes(resource) ? 0 : resource === 'weight' ? 27 : 6
+  const days = resource === 'weight' ? 27 : 6
   const parameters = { start: daysBefore(date, days), end: date }
   return refresh ? queuedGarminRequest('/api/garmin/refresh', {
     method: 'POST', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resources: [resource], ...parameters }),
