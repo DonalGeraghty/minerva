@@ -7,6 +7,9 @@ const forbiddenProductionText = [
   'minerva-demo-session',
   'minerva-demo-account',
   'minerva-demo',
+  '/api/flashcards',
+  '/api/minerva/respond',
+  '/api/user/minerva-settings',
 ]
 
 async function filesWithin(directory) {
@@ -21,6 +24,8 @@ async function filesWithin(directory) {
 const files = await filesWithin(distDirectory)
 const scripts = files.filter((file) => file.pathname.endsWith('.js'))
 const scriptText = (await Promise.all(scripts.map((file) => readFile(file, 'utf8')))).join('\n')
+const metadataText = (await Promise.all(['index.html', 'manifest.webmanifest'].map((name) => readFile(new URL(name, distDirectory), 'utf8')))).join('\n')
+if (/flashcard|active-recall/i.test(metadataText)) throw new Error('Production metadata still advertises the retired study app')
 
 for (const marker of forbiddenProductionText) {
   if (scriptText.includes(marker)) throw new Error(`Production bundle contains dev marker: ${marker}`)

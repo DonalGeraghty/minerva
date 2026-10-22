@@ -31,9 +31,9 @@ export default function LoginSplash() {
         <section className="auth-intro">
           <Brand />
           <div>
-            <p className="eyebrow">Your memory, deliberately built</p>
-            <h1>Learn what<br />matters.</h1>
-            <p>Ask naturally, capture the answer as a flashcard, and let Minerva bring it back at the right time.</p>
+            <p className="eyebrow">Your Garmin data, together</p>
+            <h1>Your day.<br />In view.</h1>
+            <p>Connect Garmin to explore your daily movement, with clear update times and a dashboard that keeps your data close.</p>
           </div>
         </section>
         <section className="auth-panel" aria-labelledby="auth-title">
@@ -42,7 +42,7 @@ export default function LoginSplash() {
             <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => { setMode('login'); setError('') }}>Sign in</button>
             <button type="button" role="tab" aria-selected={mode === 'register'} onClick={() => { setMode('register'); setError('') }}>Register</button>
           </div>
-          {import.meta.env.DEV && <button className="demo-login-button" type="button" onClick={() => { setError(''); loginAsDemo() }}><strong>Use demo account</strong><span>demo@minerva.local · seeded flashcards</span></button>}
+          {import.meta.env.DEV && <button className="demo-login-button" type="button" onClick={() => { setError(''); loginAsDemo() }}><strong>Use demo account</strong><span>Preview Minerva · no Garmin connection</span></button>}
           <form className="auth-form" onSubmit={submit}>
             <label htmlFor="auth-email">Email<input id="auth-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
             <label htmlFor="auth-password">Password<input id="auth-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength="8" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>

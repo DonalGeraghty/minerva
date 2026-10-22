@@ -6,7 +6,7 @@ import {
   getStoredToken,
   setStoredToken,
 } from '../config/api.js'
-import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_TOKEN, DEMO_USER } from '../services/demoStore.js'
+import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_TOKEN, DEMO_USER } from '../services/demoAccount.js'
 
 const AuthContext = createContext(null)
 

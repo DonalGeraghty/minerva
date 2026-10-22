@@ -3,9 +3,6 @@ import AmbientBackground from './components/AmbientBackground.jsx'
 import Dock from './components/Dock.jsx'
 import { useAuth } from './context/AuthContext.jsx'
 import AccountPage from './pages/AccountPage.jsx'
-import AskPage from './pages/AskPage.jsx'
-import FlashcardsPage from './pages/FlashcardsPage.jsx'
-import GalleryPage from './pages/GalleryPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
 import GarminPage from './pages/GarminPage.jsx'
 
@@ -22,9 +19,6 @@ export default function App() {
       <Routes>
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<GarminPage />} />
-          <Route path="/ask" element={<AskPage />} />
-          <Route path="/flashcards" element={<FlashcardsPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

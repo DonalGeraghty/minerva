@@ -73,7 +73,7 @@ export default function AISettings() {
   if (user?.isDemo) return (
     <section className="settings-card demo-ai-card">
       <header className="settings-heading"><div><p className="settings-kicker">Demo account</p><h2>Local learning space.</h2></div><p>No connection</p></header>
-      <p>Demo mode uses seeded cards stored in this browser. It does not connect to Janus or save API keys.</p>
+      <p>Demo mode does not connect to Janus or save API keys. Sign in with your account to manage shared AI connections.</p>
     </section>
   )
 
