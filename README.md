@@ -1,6 +1,40 @@
 # Minerva
 
-Minerva is an AI-assisted flashcard and active-recall application built with React and Vite. It shares [Janus API](https://github.com/DonalGeraghty/janus-api) accounts, encrypted provider credentials, and provider/model selection with [Aether](https://github.com/DonalGeraghty/aether) and [Nyx](https://github.com/DonalGeraghty/nyx). See [Overall architecture](#overall-architecture) below for how the four services fit together.
+Minerva is being repurposed as a personal Garmin dashboard built with React and Vite. The first milestone adds a Garmin steps Overview and secure connection controls; existing Ask and Flashcards screens remain available during the transition. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx.
+
+## Garmin milestone: connection and steps
+
+- **Overview (`/`):** daily steps and an available goal for a selected local calendar date. Missing measurements are shown as unavailable; zero steps remains zero.
+- **Account (`/account`):** connect, replace, or disconnect a Garmin personal API key. Janus validates the key, encrypts both key and access token with the existing Cloud KMS key, and stores only encrypted credentials in Firestore. The browser sees safe connection metadata only.
+- **Freshness:** each steps response shows its last successful update, relative and exact times, a manual Refresh control, and a saved-data warning when refresh fails. Content remains visible during refresh. The app does not poll Garmin in the background.
+- **Caching:** Janus reuses fresh account/connection/date-scoped Firestore results. Ranges ending within the recent four-day UTC window use a 15-minute freshness window; older ranges use 24 hours. A manual refresh bypasses freshness, subject to the shared connection refresh lock, a 10-second cooldown, and Garmin rate-limit delays. Steps requests accept at most 28 inclusive days; the current card requests one selected date.
+- **Disconnect:** stored secrets are removed, saved history is retained, and reconnecting starts a new cache generation. Disconnect does not revoke the key at Garmin. Shared account deletion removes all Garmin credentials and cache documents as well as the account's other data.
+- **Demo:** Garmin requests and credential entry are disabled in the local demo; existing flashcard demo functionality remains available.
+
+Deploy the updated Janus service before this frontend. Existing Firestore access and `AI_KMS_KEY_NAME` configuration are reused; no new Google Cloud service or dependency is required. For local development, point `VITE_JANUS_API_URL` at the updated Janus instance and provide that instance with working Firestore/KMS credentials. Garmin has no plaintext or in-memory credential fallback.
+
+Generate your personal key on [Garmin Connect](https://connect.garmin.com/app/settings/personalApiToken), then enter it in Account. Do not place the key in Vite environment variables or browser storage. Access tokens are renewed server-side; an expired/revoked Garmin connection prompts replacement without ending your Janus session.
+
+The automated checks cover the integration with synthetic Garmin responses and mocked external services. A live Garmin smoke test requires a connected account and configured Google Cloud access.
+
+## Planned repurpose: Garmin dashboard
+
+Minerva will become a dedicated personal Garmin dashboard, replacing its flashcard interface. The connection/steps milestone above is implemented; the remaining endpoint coverage, saved overview preferences, and complete flashcard-interface replacement are planned. The repository, existing deployment, shared Janus login, and account controls will be retained. Aether will remain the habit tracker.
+
+See [Garmin dashboard implementation plan](GARMIN_PLAN.md) for endpoint coverage, credential handling, caching, build sequence, and completion criteria.
+
+- **Overview:** configurable cards for chosen measurements, with visibility and ordering saved to the account and Reset to defaults.
+- **Activities:** searchable, paginated history, activity details, associated workouts, and original file downloads.
+- **Health:** sleep, heart rate, HRV, stress, Body Battery, steps, hydration, SpO2, fitness age, weight, nutrition, women's health, profile settings, and the remaining documented API data.
+- **Account:** Garmin connection and replacement/disconnection, dashboard preferences, and existing shared account settings.
+
+The architecture is `Minerva -> Janus API -> Garmin Personal API`. Janus will use existing Cloud KMS encryption for credentials and the existing Firestore database for account-owned cached responses and preferences. No additional Google Cloud service is needed for the initial design.
+
+Every section/card will have independent loading and error handling, its own last-successful-update time, a Refresh control, and a clear notice when saved data is shown after a Garmin failure. Detailed sections remain available when their overview cards are hidden. The first release covers all 26 endpoints in Janus's `garmin_swagger.md`.
+
+The transition will retain existing flashcards and review history in Janus. Removing those records or retiring flashcard endpoints is a separate decision. Shared account deletion still affects data across Minerva, Aether, and Nyx; clearing only Garmin data will be a separate action. Garmin-to-AI analysis and automatic habit completion are later features.
+
+The flashcard flow, demo instructions, and backend requirements below describe the retained Ask (`/ask`) and Flashcards (`/flashcards`) features during the transition.
 
 ## Product flow
 
@@ -66,7 +100,7 @@ npm run check
 npm run build
 ```
 
-The frontend tests cover confirmation-only card creation and the due-card review flow. Janus API contains API, isolation, scheduling, idempotency, and account-deletion tests. The production build also verifies that development-only demo fixtures are absent and that public icon assets stay within their size budgets.
+The frontend tests cover Garmin connection/replacement/disconnection, steps freshness and refresh failures, missing/zero measurements, obsolete requests after date changes, demo isolation, and the retained card flows. Janus contains Garmin API/cache/credential lifecycle tests alongside existing API, isolation, scheduling, idempotency, and account-deletion tests.
 
 ## Cloud Run
 

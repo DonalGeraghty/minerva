@@ -7,6 +7,7 @@ export class ApiError extends Error {
     this.status = status
     this.code = code
     this.provider = metadata.provider
+    this.retryAfter = metadata.retry_after || 0
   }
 }
 
