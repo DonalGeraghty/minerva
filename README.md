@@ -1,13 +1,14 @@
 # Minerva
 
-Minerva is a personal Garmin dashboard built with React and Vite. It provides a daily steps Overview and secure Garmin connection controls. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx.
+Minerva is a personal Garmin dashboard built with React and Vite. It provides steps, sleep, recent activities, and secure Garmin connection controls. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx.
 
-## Garmin milestone: connection and steps
+## Garmin overview
 
-- **Overview (`/`):** daily steps and an available goal for a selected local calendar date. Missing measurements are shown as unavailable; zero steps remains zero.
+- **Overview (`/`):** a shared calendar-date selector and independent steps, sleep, and recent-activity cards. Steps show the daily total and available goal. Sleep shows main sleep duration, overall score out of 100 when returned, and deep/light/REM/awake durations. Missing measurements are unavailable; recorded zero values remain zero.
+- **Recent activities:** the latest five activities in the 28 calendar days ending on the selected date, inclusive. Summaries show name/type, recorded local start time, duration, and distance in kilometres. Multisport child activities are excluded. Empty history and missing sleep have explicit empty states.
 - **Account (`/account`):** connect, replace, or disconnect a Garmin personal API key. Janus validates the key, encrypts both key and access token with the existing Cloud KMS key, and stores only encrypted credentials in Firestore. The browser sees safe connection metadata only.
-- **Freshness:** each steps response shows its last successful update, relative and exact times, a manual Refresh control, and a saved-data warning when refresh fails. Content remains visible during refresh. The app does not poll Garmin in the background.
-- **Caching:** Janus reuses fresh account/connection/date-scoped Firestore results. Ranges ending within the recent four-day UTC window use a 15-minute freshness window; older ranges use 24 hours. A manual refresh bypasses freshness, subject to the shared connection refresh lock, a 10-second cooldown, and Garmin rate-limit delays. Steps requests accept at most 28 inclusive days; the current card requests one selected date.
+- **Freshness:** every card shows its own successful update time, manual Refresh control, returned-data inspection, and saved-data warning when refresh fails. Existing content remains visible during refresh. A failed or pending card leaves the others usable. The app does not poll Garmin in the background.
+- **Caching:** Janus reuses account/connection/resource/date-scoped Firestore results. Recent data uses 15-minute freshness; older data uses 24 hours. Each resource has a refresh lock and minimum 10-second cooldown, allowing the three cards to load independently. Actual Garmin rate-limit delays apply across the connection. Manual refresh affects only its own card. Steps and sleep request the selected date; activities request a bounded 28-day range.
 - **Disconnect:** stored secrets are removed, saved history is retained, and reconnecting starts a new cache generation. Disconnect does not revoke the key at Garmin. Shared account deletion removes all Garmin credentials and cache documents as well as the account's other data.
 - **Demo:** The local preview has no Garmin connection, seeded study content, or credential entry.
 
@@ -19,7 +20,7 @@ The automated checks cover the integration with synthetic Garmin responses and m
 
 ## Planned dashboard expansion
 
-The Garmin connection/steps milestone is implemented, and the former study interface has been removed. Remaining endpoint coverage and saved overview preferences are planned. The repository, existing deployment, shared Janus login, and account controls will be retained. Aether will remain the habit tracker.
+Steps, sleep, and recent activity summaries are implemented, and the former study interface has been removed. Remaining endpoint coverage and saved overview preferences are planned. The repository, existing deployment, shared Janus login, and account controls will be retained. Aether will remain the habit tracker.
 
 See [Garmin dashboard implementation plan](GARMIN_PLAN.md) for endpoint coverage, credential handling, caching, build sequence, and completion criteria.
 
@@ -38,7 +39,7 @@ The former Ask, Flashcards, Gallery, and card-context controls have been removed
 
 1. Sign in with your shared Janus account.
 2. Connect a Garmin personal API key in Account.
-3. Open Overview, choose a date, and inspect daily steps and available goals.
+3. Open Overview, choose a date, and inspect steps, sleep, and recent activities in its 28-day window.
 4. Use Refresh and the update timestamps to understand freshness.
 5. Manage Garmin and shared AI connections in Account.
 

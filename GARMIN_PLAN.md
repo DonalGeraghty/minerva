@@ -1,10 +1,10 @@
 # Garmin dashboard implementation plan
 
-Status: connection and steps milestone deployed and verified by the user. Study UI and related backend endpoints are now retired locally; full Garmin endpoint coverage remains planned. This plan covers repurposing Minerva and adding Garmin integration in the sibling Janus API repository. It supersedes the earlier proposal to add a Garmin tab to Aether.
+Status: connection and steps milestone deployed and verified by the user. Study UI and related backend endpoints are now retired locally; sleep and recent activity cards are now implemented locally; full Garmin endpoint coverage remains planned. This plan covers repurposing Minerva and adding Garmin integration in the sibling Janus API repository. It supersedes the earlier proposal to add a Garmin tab to Aether.
 
 ### First milestone delivered
 
-The current frontend has Garmin Overview at `/` and connection controls in Account. Legacy study URLs redirect to Overview. Janus implements connection GET/PUT/DELETE, steps GET, and steps-only POST refresh, with encrypted key/token persistence, generation checks, account deletion cleanup, bounded date ranges, refresh locking/backoff, and stale-data fallback. Synthetic integration and UI tests exercise this path. Saved dashboard preferences, other resources, and Garmin-only cache clearing remain future work in this plan. Ask, Flashcards, Gallery, scheduling/drafting code, and card-context endpoints have been removed; historical records retain account-deletion cleanup.
+The current frontend has Garmin Overview at `/` and connection controls in Account. Legacy study URLs redirect to Overview. Janus implements connection GET/PUT/DELETE, steps/sleep/activity GET, and independent-resource POST refresh, with encrypted key/token persistence, generation checks, account deletion cleanup, bounded date ranges, refresh locking/backoff, and stale-data fallback. Synthetic integration and UI tests exercise this path. Saved dashboard preferences, the remaining resources, and Garmin-only cache clearing remain future work in this plan. Ask, Flashcards, Gallery, scheduling/drafting code, and card-context endpoints have been removed; historical records retain account-deletion cleanup.
 
 ## 1. Scope and agreed behaviour
 
