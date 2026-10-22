@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { freshnessText } from '../services/garmin.js'
 
-export default function GarminResourceCard({ id, title, resource, state, now, description, children }) {
+export default function GarminResourceCard({ id, title, resource, state, now, description, children, footer }) {
   const { current, error, busy, warning, code, cooldown, stale, reconnect, refresh } = state
-  return <section className={`garmin-panel garmin-card garmin-${resource}-card`} aria-labelledby={`${id}-heading`} aria-busy={busy}>
+  return <section id={id} className={`garmin-panel garmin-card garmin-${resource}-card`} aria-labelledby={`${id}-heading`} aria-busy={busy}>
     <header><h2 id={`${id}-heading`}>{title}</h2><span className="garmin-badge">{busy ? 'Loading…' : stale ? 'Needs refresh' : current ? 'Up to date' : 'Not loaded'}</span></header>
     <div className="garmin-card-toolbar"><p>{description}</p><button className="secondary-button" type="button" disabled={busy || cooldown > 0} onClick={refresh}>{busy && current ? 'Refreshing…' : cooldown ? `Refresh in ${cooldown}s` : `Refresh ${resource}`}</button></div>
     {current && <>
@@ -15,5 +15,6 @@ export default function GarminResourceCard({ id, title, resource, state, now, de
     {warning && <p className="settings-message is-error" role="alert">{current ? 'Showing saved data. ' : ''}{warning}</p>}
     {reconnect && <p><Link to="/account">{code === 'garmin_connection_required' ? 'Connect Garmin in Account' : 'Replace your Garmin key in Account'}</Link></p>}
     {!current && error && !reconnect && <p>The other dashboard sections remain available. You can retry this section.</p>}
+    {footer}
   </section>
 }

@@ -1,14 +1,22 @@
 # Minerva
 
-Minerva is a personal Garmin dashboard built with React and Vite. It provides steps, sleep, recent activities, and secure Garmin connection controls. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx.
+Minerva is a personal Garmin dashboard built with React and Vite. It provides movement, sleep, activities, recovery and health panels with account-saved visibility, plus secure Garmin connection controls. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx.
 
-## Garmin overview
+## Garmin tabs
 
-- **Overview (`/`):** a shared calendar-date selector and independent steps, sleep, and recent-activity cards. Steps show the daily total and available goal. Sleep shows seven nightly duration bars ending on the selected date, with an average across recorded nights. Select a bar by mouse, touch, or keyboard to see that night's duration, overall score out of 100 when returned, and deep/light/REM/awake durations. Missing nights show gaps and are excluded from the average; recorded zero values remain zero.
+- **Overview (`/`):** five compact summaries for daily steps, sleep on the selected date, latest Body Battery, resting heart rate and the latest activity. Each summary links to its detailed tab with the date and panel anchor. Charts and full activity lists live in the detailed tabs.
+- **Recovery (`/recovery`):** seven-day sleep chart with selectable nightly score/stages, Body Battery, stress and HRV. Missing nights remain gaps and are excluded from averages.
+- **Activities (`/activities`):** recent activity list, expandable sport metrics, full activity measurements/splits and associated workouts.
+- **Health (`/health`):** heart-rate timeline/resting trend, weight, hydration and fitness age.
+- **Movement (`/movement`):** daily steps/goal, weekly steps chart, distance, floors and intensity minutes.
+- **Dates and loading:** each tab remembers its own selected date in memory while signed in. A `?date=YYYY-MM-DD` deep link selects a date; invalid/future values fall back to that tab's date or today. Only the active tab mounts its panels, pending requests are cancelled when leaving, and detailed tabs load independently of Overview visibility/preferences. Date choices reset with the signed-in account; they are not written to the database.
 - **Recent activities:** the latest five activities in the 28 calendar days ending on the selected date, inclusive. Summaries show name/type, recorded local start time/location, duration, distance, average heart rate, and calories. Expand an activity for moving/elapsed time, sport-specific average pace, speed, ascent/descent, steps/laps, training focus/load/effects, Body Battery change, intensity minutes, water estimate, and recorded heart-rate zone bars. Available cadence, power, running dynamics, rowing strokes, and strength set/rep metrics appear under Sport metrics. Strength exercise summaries show sets, reps, maximum weight in kilograms, and duration. Missing optional fields are omitted from details; zero values remain zero. Pace is derived from Garmin's average speed (min/km for running/walking/hiking, min/500 m for rowing, min/100 m for swimming) and is unavailable at zero speed. All details use the already loaded response; no extra API calls are made. Multisport child activities are excluded. Empty history and missing sleep have explicit empty states.
-- **Account (`/account`):** connect, replace, or disconnect a Garmin personal API key. Janus validates the key, encrypts both key and access token with the existing Cloud KMS key, and stores only encrypted credentials in Firestore. The browser sees safe connection metadata only.
+- **Account (`/account`):** connect, replace, or disconnect a Garmin personal API key, manage shared account settings, and sign out. The bottom navigation shows all five Garmin tabs plus Account with visible labels on mobile. Janus validates the key, encrypts both key and access token with the existing Cloud KMS key, and stores only encrypted credentials in Firestore. The browser sees safe connection metadata only.
+- **Health and recovery:** Body Battery charge/drain, wake/latest levels and intraday curve; heart-rate timeline and seven-day resting trend; stress levels/durations and seven-day averages; HRV status, baseline and overnight trend; weekly steps/distance/floors/intensity; 28-day weight trend and available composition; hydration intake/goal/history; and fitness age with Garmin's contributing factors. Missing data remains unavailable. Time-series columns are read using Garmin's descriptors, negative missing-reading sentinels leave gaps, and exact chart values are available in tables. Intraday Body Battery and heart-rate times are explicitly UTC; activity start times retain Garmin's local clock.
+- **Full activity view:** within an activity's expanded details, choose Explore full activity to load detailed measurements/split summaries and associated workouts independently. Each has its own freshness/refresh/error state; closing the view aborts pending reads. The existing summary details still use only the already loaded activity list.
+- **Manage panels:** customise the five Overview summaries and save visibility to your Janus account. Reset to defaults previews all five and also requires Save to persist. Saved choices load before Overview requests begin. Hiding a summary stops that Overview request; its detailed tab remains available. Existing preference records are supported without migration, including preserving IDs previously saved for panels now on detailed tabs. Preferences survive Garmin disconnect; shared account deletion removes them. Panel ordering remains a future feature.
 - **Freshness:** every card shows its own successful update time, manual Refresh control, returned-data inspection, and saved-data warning when refresh fails. Existing content remains visible during refresh. A failed or pending card leaves the others usable. The app does not poll Garmin in the background.
-- **Caching:** Janus reuses account/connection/resource/date-scoped Firestore results. Recent data uses 15-minute freshness; older data uses 24 hours. Each resource has a refresh lock and minimum 10-second cooldown, allowing the three cards to load independently. Actual Garmin rate-limit delays apply across the connection. Manual refresh affects only its own card. Steps request the selected date, sleep makes one seven-day history request, and activities request a bounded 28-day range. Selecting a sleep bar uses the loaded history without another network request.
+- **Caching:** Janus reuses account/connection/resource/date-scoped Firestore results. Recent data uses 15-minute freshness; older data uses 24 hours. Each resource has a refresh lock and minimum 10-second cooldown. Actual Garmin rate-limit delays apply across the connection. The browser queues Garmin requests with at most two active requests. Manual refresh affects only its own card. Steps request the selected date; sleep, stress, HRV, movement and hydration use seven-day windows; weight and recent activities use 28-day windows. Body Battery, heart rate and fitness age use the selected date, with heart rate also including seven-day resting history. Selecting a sleep bar uses the loaded history without another network request. Fitness age retains Garmin's original measurement date; it may represent the latest available measurement as of the chosen date.
 - **Disconnect:** stored secrets are removed, saved history is retained, and reconnecting starts a new cache generation. Disconnect does not revoke the key at Garmin. Shared account deletion removes all Garmin credentials and cache documents as well as the account's other data.
 - **Demo:** The local preview has no Garmin connection, seeded study content, or credential entry.
 
@@ -20,13 +28,13 @@ The automated checks cover the integration with synthetic Garmin responses and m
 
 ## Planned dashboard expansion
 
-Steps, sleep, and recent activity summaries are implemented, and the former study interface has been removed. Remaining endpoint coverage and saved overview preferences are planned. The repository, existing deployment, shared Janus login, and account controls will be retained. Aether will remain the habit tracker.
+Overview, Recovery, Activities, Health and Movement tabs, eleven detailed resources, full activity measurements/workouts, and saved Overview visibility are implemented. The former study interface has been removed. Remaining endpoint coverage, panel ordering, searchable/paginated activity history, and file downloads remain planned. The repository, deployment, shared Janus login, and account controls are retained. Aether remains the habit tracker.
 
 See [Garmin dashboard implementation plan](GARMIN_PLAN.md) for endpoint coverage, credential handling, caching, build sequence, and completion criteria.
 
 - **Overview:** configurable cards for chosen measurements, with visibility and ordering saved to the account and Reset to defaults.
 - **Activities:** searchable, paginated history, activity details, associated workouts, and original file downloads.
-- **Health:** sleep, heart rate, HRV, stress, Body Battery, steps, hydration, SpO2, fitness age, weight, nutrition, women's health, profile settings, and the remaining documented API data.
+- **Further health coverage:** SpO2, nutrition, women's health, profile settings, and remaining documented API data.
 - **Account:** Garmin connection and replacement/disconnection, dashboard preferences, and existing shared account settings.
 
 The architecture is `Minerva -> Janus API -> Garmin Personal API`. Janus will use existing Cloud KMS encryption for credentials and the existing Firestore database for account-owned cached responses and preferences. No additional Google Cloud service is needed for the initial design.
@@ -39,9 +47,9 @@ The former Ask, Flashcards, Gallery, and card-context controls have been removed
 
 1. Sign in with your shared Janus account.
 2. Connect a Garmin personal API key in Account.
-3. Open Overview, choose a date, and inspect steps, sleep, and recent activities in its 28-day window.
+3. Open Overview, choose a date, and follow a summary or use the tab navigation to explore detailed data.
 4. Use Refresh and the update timestamps to understand freshness.
-5. Manage Garmin and shared AI connections in Account.
+5. Use Manage panels to save overview visibility; manage Garmin and shared AI connections in Account.
 
 ## Local development
 
