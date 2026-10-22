@@ -2,10 +2,14 @@ import { NavLink } from 'react-router-dom'
 
 const items = [
   { to: '/', label: 'Overview', icon: '◈', end: true },
+  { to: '/recovery', label: 'Recovery', icon: '☾' },
+  { to: '/activities', label: 'Activities', icon: '↗' },
+  { to: '/health', label: 'Health', icon: '♡' },
+  { to: '/movement', label: 'Movement', icon: '⌁' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
 
-export default function Dock({ onLogout }) {
+export default function Dock() {
   return (
     <div className="dock-outer">
       <nav className="dock" aria-label="Primary navigation">
@@ -21,11 +25,6 @@ export default function Dock({ onLogout }) {
             <span className="dock-icon" aria-hidden="true">{item.icon}</span>
           </NavLink>
         ))}
-        <span className="dock-divider" aria-hidden="true" />
-        <button className="dock-item" type="button" onClick={onLogout} aria-label="Sign out">
-          <span className="dock-label">Sign out</span>
-          <span className="dock-icon" aria-hidden="true">↪</span>
-        </button>
       </nav>
     </div>
   )

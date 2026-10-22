@@ -1,4 +1,4 @@
-import { apiRequest } from './request.js'
+import { queuedGarminRequest as apiRequest } from './garminQueue.js'
 
 export function getGarminConnection(signal) {
   return apiRequest('/api/garmin/connection', { signal })

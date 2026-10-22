@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import FullActivityDetails from './FullActivityDetails.jsx'
+
 function numeric(value, signed = false) {
   return typeof value === 'number' && Number.isFinite(value) && (signed || value >= 0) ? value : null
 }
@@ -66,6 +69,7 @@ function ExerciseSummaries({ exercises }) {
 }
 
 export default function ActivitySummary({ activity }) {
+  const [exploring, setExploring] = useState(false)
   const typeKey = typeof activity.activityType?.typeKey === 'string' ? activity.activityType.typeKey : ''
   const type = label(typeKey) || 'Activity'
   const started = typeof activity.startTimeLocal === 'string' ? activity.startTimeLocal.replace('T', ' ').slice(0, 16) : 'Date unavailable'
@@ -108,6 +112,8 @@ export default function ActivitySummary({ activity }) {
         <HeartRateZones activity={activity} />
       </div>
       <ExerciseSummaries exercises={activity.summarizedExerciseSets} />
+      <button type="button" className="secondary-button" aria-expanded={exploring} onClick={() => setExploring((value) => !value)}>{exploring ? 'Close full activity' : 'Explore full activity'}</button>
+      {exploring && <FullActivityDetails activityId={activity.activityId} />}
     </details>
   </li>
 }

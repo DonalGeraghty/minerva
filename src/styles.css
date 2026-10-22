@@ -142,13 +142,12 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .demo-account-note h2 { margin: .35rem 1.5rem 0; font-size: 1.65rem; font-weight: 500; letter-spacing: -.04em; }
 
 .dock-outer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 50; display: flex; justify-content: center; height: 5.5rem; pointer-events: none; }
-.dock { position: absolute; bottom: .75rem; display: flex; align-items: center; gap: .35rem; padding: .45rem; border: 1px solid #2d2b25; border-radius: 1rem; background: rgb(7 7 6 / 90%); box-shadow: 0 1.5rem 4rem #000; backdrop-filter: blur(18px); pointer-events: auto; }
-.dock-item { position: relative; display: grid; width: 2.9rem; height: 2.9rem; place-items: center; padding: 0; border: 1px solid transparent; border-radius: .7rem; color: #77736a; background: transparent; text-decoration: none; cursor: pointer; transition: width .18s, height .18s, color .18s, background .18s; }
-.dock-item:hover, .dock-item:focus-visible { width: 3.2rem; height: 3.2rem; color: #fff; background: #15130f; }
+.dock { position: absolute; bottom: calc(.75rem + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); width: min(calc(100% - 1rem), 38rem); gap: .15rem; padding: .45rem; border: 1px solid #2d2b25; border-radius: 1rem; background: rgb(7 7 6 / 94%); box-shadow: 0 1.5rem 4rem #000; backdrop-filter: blur(18px); pointer-events: auto; }
+.dock-item { position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: .25rem; min-width: 0; min-height: 3.25rem; padding: .3rem .1rem; border: 1px solid transparent; border-radius: .7rem; color: #99958c; background: transparent; text-decoration: none; cursor: pointer; transition: color .18s, background .18s; }
+.dock-item:hover, .dock-item:focus-visible { color: #fff; background: #15130f; }
 .dock-item.is-current { border-color: #514a37; color: var(--gold); background: #17140e; }
 .dock-icon { font-size: 1.1rem; }
-.dock-label { position: absolute; bottom: calc(100% + .65rem); left: 50%; padding: .27rem .5rem; border: 1px solid #2d2b25; border-radius: .35rem; color: var(--soft); background: #080807; font-size: .61rem; opacity: 0; transform: translate(-50%, .2rem); transition: opacity .15s, transform .15s; pointer-events: none; }
-.dock-item:hover .dock-label, .dock-item:focus-visible .dock-label { opacity: 1; transform: translate(-50%, 0); }
+.dock-label { font-size: clamp(.58rem, 1.8vw, .72rem); white-space: nowrap; line-height: 1.2; }
 .dock-divider { width: 1px; height: 1.8rem; margin: 0 .15rem; background: #312e27; }
 
 @media (max-width: 56rem) {
@@ -202,6 +201,14 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .garmin-date-controls input { min-height: 2.8rem; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: #090909; color: var(--text); color-scheme: dark; }
 .garmin-overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; align-items: start; }
 .garmin-card { min-width: 0; margin-bottom: 0; }
+.garmin-card { scroll-margin-top: 1.5rem; }
+.overview-summary-grid { align-items: stretch; }
+.overview-summary-grid .garmin-activities-card { grid-column: auto; }
+.overview-summary-value { color: var(--text) !important; font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -.04em; margin: 1rem 0 .5rem; }
+.overview-summary-value span { color: var(--muted); font-size: .8rem; letter-spacing: normal; }
+.overview-activity-name { color: var(--text); font-size: 1.2rem; overflow-wrap: anywhere; font-weight: 500; }
+.overview-summary-link { font-size: .8rem; margin-top: 1.5rem; }
+@media (min-width: 64rem) { .overview-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .garmin-activities-card { grid-column: 1 / -1; }
 .garmin-card-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 .garmin-card-toolbar p { flex: 1 1 12rem; margin: 0; font-size: .8rem; }
@@ -245,6 +252,29 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .activity-exercises th, .activity-exercises td { padding: .75rem .6rem; border-bottom: 1px solid var(--line); }
 .activity-exercises th { font-weight: 500; }
 .activity-exercises thead th { color: var(--muted); }
+.dashboard-panel-manager { margin-top: 1rem; }
+.dashboard-panel-manager summary { color: var(--gold); cursor: pointer; }
+.dashboard-panel-manager fieldset { border: 1px solid var(--line); border-radius: .6rem; margin: 1rem 0; padding: 1rem; }
+.dashboard-panel-manager legend { color: var(--soft); font-size: .8rem; }
+.dashboard-panel-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .8rem; }
+.dashboard-panel-options label { display: flex; align-items: center; gap: .6rem; }
+.dashboard-panel-options input { width: 1rem; min-height: 1rem; accent-color: var(--gold); }
+.health-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.2rem 0; }
+.health-metrics > div { min-width: 0; }
+.health-metrics dd { overflow-wrap: anywhere; }
+.garmin-trend-chart { margin: 1.5rem 0; }
+.garmin-trend-chart figcaption { color: var(--soft); font-size: .8rem; margin-bottom: .75rem; }
+.garmin-trend-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.garmin-trend-chart svg text { fill: var(--muted); font-size: 10px; }
+.trend-grid { stroke: var(--line); stroke-width: 1; }
+.trend-line { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; }
+.trend-dot { fill: var(--gold); }
+.garmin-panel table { width: 100%; border-collapse: collapse; text-align: left; font-size: .75rem; color: var(--soft); }
+.garmin-panel table caption { text-align: left; margin-bottom: .6rem; color: var(--muted); }
+.garmin-panel th, .garmin-panel td { padding: .6rem; border-bottom: 1px solid var(--line); font-weight: 400; }
+.garmin-panel progress { width: 100%; accent-color: var(--gold); }
+.health-reading-picker select { padding: .6rem; border: 1px solid var(--line); border-radius: .4rem; background: var(--surface); color: var(--text); }
+.full-activity-details { display: grid; gap: 1rem; margin: 1rem 0; }
 @media (max-width: 46rem) { .activity-primary-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .activity-detail-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 46rem) { .garmin-overview-grid { grid-template-columns: minmax(0, 1fr); } .garmin-sleep-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
