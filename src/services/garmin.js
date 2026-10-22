@@ -24,11 +24,12 @@ export function getGarminSteps(date, { refresh = false, signal } = {}) {
 }
 
 export function getGarminSleep(date, { refresh = false, signal } = {}) {
+  const parameters = { start: daysBefore(date, 6), end: date }
   if (refresh) return apiRequest('/api/garmin/refresh', {
     method: 'POST', signal, headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ resources: ['sleep'], start: date, end: date }),
+    body: JSON.stringify({ resources: ['sleep'], ...parameters }),
   })
-  return apiRequest(`/api/garmin/data/sleep?${new URLSearchParams({ date })}`, { signal })
+  return apiRequest(`/api/garmin/data/sleep?${new URLSearchParams(parameters)}`, { signal })
 }
 
 export function daysBefore(date, days) {

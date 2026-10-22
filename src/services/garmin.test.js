@@ -6,11 +6,13 @@ vi.mock('./request.js', () => ({ apiRequest: vi.fn(async () => ({})) }))
 beforeEach(() => vi.clearAllMocks())
 
 describe('Garmin resource requests', () => {
-  it('requests sleep for the selected calendar date and refreshes it independently', async () => {
+  it('requests seven inclusive sleep dates and refreshes the whole window independently', async () => {
     await getGarminSleep('2026-10-22')
-    expect(apiRequest).toHaveBeenLastCalledWith('/api/garmin/data/sleep?date=2026-10-22', expect.any(Object))
+    expect(apiRequest).toHaveBeenLastCalledWith('/api/garmin/data/sleep?start=2026-10-16&end=2026-10-22', expect.any(Object))
     await getGarminSleep('2026-10-22', { refresh: true })
-    expect(JSON.parse(apiRequest.mock.lastCall[1].body)).toEqual({ resources: ['sleep'], start: '2026-10-22', end: '2026-10-22' })
+    expect(JSON.parse(apiRequest.mock.lastCall[1].body)).toEqual({ resources: ['sleep'], start: '2026-10-16', end: '2026-10-22' })
+    await getGarminSleep('2026-01-03')
+    expect(apiRequest.mock.lastCall[0]).toBe('/api/garmin/data/sleep?start=2025-12-28&end=2026-01-03')
   })
 
   it('requests the latest five activities over 28 inclusive dates across year and DST boundaries', async () => {

@@ -3,7 +3,7 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import GarminPage from './GarminPage.jsx'
-import { getGarminActivities, getGarminSleep, getGarminSteps, localDate } from '../services/garmin.js'
+import { daysBefore, getGarminActivities, getGarminSleep, getGarminSteps, localDate } from '../services/garmin.js'
 import { ApiError } from '../services/request.js'
 
 const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'one' }, logout: vi.fn() } }))
@@ -20,7 +20,7 @@ beforeEach(() => {
   vi.resetAllMocks()
   auth.user = { accountId: 'one' }
   getGarminSteps.mockResolvedValue(envelope([{ calendarDate: localDate(), totalSteps: 4321 }]))
-  getGarminSleep.mockResolvedValue(envelope(sleep))
+  getGarminSleep.mockResolvedValue(envelope([{ ...sleep, calendarDate: localDate() }]))
   getGarminActivities.mockResolvedValue(envelope([activity]))
 })
 afterEach(() => cleanup())
@@ -67,7 +67,7 @@ describe('Sleep and recent activity overview', () => {
   })
 
   it('handles missing sleep, missing score, zero stages, and empty activity history honestly', async () => {
-    getGarminSleep.mockResolvedValue(envelope({ dailySleepDTO: { ...sleep, remSleepSeconds: 0, sleepScores: null } }))
+    getGarminSleep.mockResolvedValue(envelope([{ calendarDate: localDate(), ...sleep, remSleepSeconds: 0, sleepScores: null }]))
     getGarminActivities.mockResolvedValue(envelope([]))
     show()
     expect(await card('Sleep').findByText('7h 30m')).toBeInTheDocument()
@@ -75,8 +75,29 @@ describe('Sleep and recent activity overview', () => {
     expect(card('Sleep').getByText('0m')).toBeInTheDocument()
     expect(await card('Recent activities').findByText('No activities were returned for this 28-day period.')).toBeInTheDocument()
     cleanup()
-    getGarminSleep.mockResolvedValue(envelope(null))
+    getGarminSleep.mockResolvedValue(envelope([]))
     show()
     expect(await card('Sleep').findByText('No sleep measurement is available for this date.')).toBeInTheDocument()
+  })
+
+  it('shows seven selectable nights, excludes missing nights from the average, and keeps dates distinct', async () => {
+    const user = userEvent.setup()
+    const today = localDate()
+    const previous = daysBefore(today, 1)
+    getGarminSleep.mockResolvedValue(envelope([
+      { ...sleep, calendarDate: previous, sleepTimeSeconds: 21600, sleepScores: { overall: { value: 68 } } },
+      { ...sleep, calendarDate: today },
+    ]))
+    show()
+    const chart = await card('Sleep').findByRole('group', { name: 'Sleep duration over seven days' })
+    expect(within(chart).getAllByRole('button')).toHaveLength(7)
+    expect(card('Sleep').getByText('Average 6h 45m across 2 recorded nights.')).toBeInTheDocument()
+    expect(within(chart).getByRole('button', { name: `${today}: 7h 30m, sleep score 82/100` })).toHaveAttribute('aria-pressed', 'true')
+    await user.click(within(chart).getByRole('button', { name: `${previous}: 6h 0m, sleep score 68/100` }))
+    expect(card('Sleep').getByText(`Recorded for ${previous}`)).toBeInTheDocument()
+    expect(card('Sleep').getByText('68/100')).toBeInTheDocument()
+    await user.click(within(chart).getByRole('button', { name: `${daysBefore(today, 2)}: No sleep data` }))
+    expect(card('Sleep').getByText('No sleep measurement is available for this date.')).toBeInTheDocument()
+    expect(getGarminSleep).toHaveBeenCalledTimes(1)
   })
 })
