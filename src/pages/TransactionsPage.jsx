@@ -86,7 +86,7 @@ export default function TransactionsPage() {
             <table className="finance-table">
               <caption>{data.total} matching rows · snapshot {data.meta.snapshot_id?.slice(0, 8)}… · rule set v{data.meta.rule_set_version}</caption>
               <thead>
-                <tr><th>Date</th><th>ID</th><th>Description</th><th>Merchant</th><th>Category</th><th>Amount</th><th>Type</th><th>Rule</th></tr>
+                <tr><th>Date</th><th>ID</th><th>Description</th><th>Merchant</th><th>Category</th><th>Original amount</th><th>Budget amount</th><th>Type</th><th>Rule</th></tr>
               </thead>
               <tbody>
                 {data.transactions.map((row) => (
@@ -97,11 +97,12 @@ export default function TransactionsPage() {
                     <td>{row.merchant || '—'}</td>
                     <td>{row.derived?.category || row.category || '—'}</td>
                     <td className={Number(row.amount_eur) < 0 ? 'is-negative' : ''}>{eur(row.amount_eur)}</td>
+                    <td className={Number(row.derived?.effective_budget_amount_eur) < 0 ? 'is-negative' : ''}>{row.derived?.effective_budget_amount_eur == null ? '—' : eur(row.derived.effective_budget_amount_eur)}</td>
                     <td>{row.derived?.type || row.type || '—'}</td>
-                    <td>{row.derived?.rule_id ? `${row.derived.rule_id} ${row.derived.action}${row.derived.excluded ? ' (excluded)' : ''}${row.derived.review ? ' (review)' : ''}` : (row.derived?.excluded ? 'excluded (sheet flag)' : '—')}</td>
+                    <td>{row.derived?.rule_id ? `${row.derived.rule_id} ${row.derived.action}${row.derived.excluded ? ' (excluded)' : ''}${row.derived.review ? ' (review)' : ''}` : (row.derived?.excluded ? 'excluded' : '—')}{row.derived?.exclusion_reason && <small> · {row.derived.exclusion_reason.replaceAll('_', ' ')}</small>}</td>
                   </tr>
                 ))}
-                {data.transactions.length === 0 && <tr><td colSpan={8}>No transactions match.</td></tr>}
+                {data.transactions.length === 0 && <tr><td colSpan={9}>No transactions match.</td></tr>}
               </tbody>
             </table>
             <div className="form-actions finance-pager">
