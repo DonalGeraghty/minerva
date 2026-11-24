@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext.jsx'
 import AccountPage from './pages/AccountPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
 import GarminPage from './pages/GarminPage.jsx'
+import RulesPage from './pages/RulesPage.jsx'
 import GarminDatesProvider from './context/GarminDatesProvider.jsx'
 
 function ProtectedLayout() {
@@ -26,6 +27,7 @@ export default function App() {
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<GarminPage />} />
           <Route path="/activities" element={<GarminPage tab="activities" />} />
+          <Route path="/rules" element={<RulesPage />} />
           {['recovery', 'health', 'movement'].map((path) => <Route key={path} path={`/${path}`} element={<DashboardRedirect />} />)}
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
