@@ -25,6 +25,8 @@ The automated checks cover the integration with synthetic Garmin responses and m
 
 ## Finance rules tab (`/rules`)
 
+Before the Rules tab works, connect your own Google Sheets finance workbook on the Account page (Finance connection): paste a read-only Google OAuth access token (`spreadsheets.readonly` scope) and the workbook ID. Janus stores the token KMS-encrypted per account — the same model as the AI provider keys — and only ever reads the workbook. Until a connection exists, finance routes return `403 finance_not_connected` and the Rules tab shows a connect link.
+
 The Rules tab manages the account-owned finance rule set through Janus `/api/finance/rules`. It lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel. Janus requires the signed-in account to be listed in `FINANCE_OWNER_EMAILS`; other accounts get a clear 403 message. The Google Sheet remains the canonical ledger — this page never writes to it.
 
 ## Planned dashboard expansion

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import RulesPage from './RulesPage.jsx'
 import * as rulesApi from '../services/financeRules.js'
+import { ApiError } from '../services/request.js'
 
 const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one', email: 'owner@example.com' }, logout: vi.fn() } }))
 vi.mock('../context/AuthContext.jsx', () => ({ useAuth: () => auth }))
@@ -108,10 +109,11 @@ describe('Rules page', () => {
     await waitFor(() => expect(rulesApi.listFinanceRules).toHaveBeenCalledTimes(2))
   })
 
-  it('shows backend errors such as missing finance entitlement', async () => {
-    rulesApi.listFinanceRules.mockRejectedValue(new Error('Finance access is not enabled for this account.'))
+  it('shows a connect prompt when the account has no finance connection', async () => {
+    rulesApi.listFinanceRules.mockRejectedValue(new ApiError('Connect your own Google Sheets workbook first (Account, Finance connection).', 403, 'finance_not_connected'))
     await renderPage()
-    expect(await screen.findByRole('alert')).toHaveTextContent('Finance access is not enabled for this account.')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Connect your own Google Sheets workbook first')
+    expect(screen.getByRole('link', { name: 'Connect your workbook in Account.' })).toHaveAttribute('href', '/account')
   })
 
   it('lists history and restores a version after confirmation', async () => {
