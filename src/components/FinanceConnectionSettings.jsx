@@ -56,8 +56,8 @@ export default function FinanceConnectionSettings() {
     } finally { if (!controller.signal.aborted) setBusy(false) }
   }
 
-  return <section className="garmin-panel" aria-labelledby="finance-connection-title">
-    <header><div><p className="eyebrow">Connections</p><h2 id="finance-connection-title">Google Sheets.</h2></div><span className="garmin-badge">{user?.isDemo ? 'Demo' : busy ? 'Working…' : connection?.connected ? 'Connected' : connection ? 'Not connected' : 'Unavailable'}</span></header>
+  return <section className="app-panel" aria-labelledby="finance-connection-title">
+    <header><div><p className="eyebrow">Connections</p><h2 id="finance-connection-title">Google Sheets.</h2></div><span className="status-badge">{user?.isDemo ? 'Demo' : busy ? 'Working…' : connection?.connected ? 'Connected' : connection ? 'Not connected' : 'Unavailable'}</span></header>
     {user?.isDemo ? <p>Connect a real Janus account to link your own finance workbook. Demo mode never sends Google credentials.</p> : <>
       <p>Link your own finance workbook in Google Drive. Janus only reads it — your ChatGPT workflow keeps writing the ledger. The access token is encrypted by Janus and is never returned to this browser.</p>
       <p><a href="https://developers.google.com/oauthplayground" target="_blank" rel="noreferrer">Get a read-only OAuth access token (scope spreadsheets.readonly) ↗</a></p>
@@ -67,7 +67,7 @@ export default function FinanceConnectionSettings() {
         <input id="finance-access-token" type="password" autoComplete="off" maxLength={2048} value={accessToken} onChange={(event) => setAccessToken(event.target.value)} disabled={busy} placeholder="ya29.…" required={!connection?.connected} />
         <label htmlFor="finance-workbook-id">Finance workbook ID</label>
         <input id="finance-workbook-id" type="text" autoComplete="off" maxLength={128} value={workbookId} onChange={(event) => setWorkbookId(event.target.value)} disabled={busy} placeholder="The long ID in your Sheets URL" required />
-        <div className="garmin-actions"><button className="primary-button" disabled={busy || (!connection?.connected && !accessToken.trim())}>{connection?.connected ? 'Replace token' : 'Connect workbook'}</button>
+        <div className="form-actions"><button className="primary-button" disabled={busy || (!connection?.connected && !accessToken.trim())}>{connection?.connected ? 'Replace token' : 'Connect workbook'}</button>
           {connection?.connected && <button className="secondary-button" type="button" disabled={busy} onClick={(event) => change(event, true)}>Disconnect</button>}
           {!connection && !busy && <button className="secondary-button" type="button" onClick={() => setReload((value) => value + 1)}>Retry connection status</button>}</div>
       </form>
