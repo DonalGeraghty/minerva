@@ -37,6 +37,8 @@ export default function WealthPage() {
         <>
           <section className="app-panel" aria-labelledby="networth-heading">
             <header><div><p className="settings-kicker">Snapshot tab</p><h2 id="networth-heading">Net worth.</h2></div></header>
+            {worth?.warnings?.length > 0 && <details className="finance-warnings"><summary>Snapshot warnings ({worth.warnings.length})</summary><ul>{worth.warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul></details>}
+            {worth?.provisional && <p className="settings-message">Some snapshots are incomplete or inconsistent. Only complete dated balances are shown.</p>}
             {!worth?.available ? <p className="settings-message">{worth?.reason || 'Net worth unavailable.'}</p> : (
               <>
                 <div className="finance-cards" role="group" aria-label="Latest balances">
