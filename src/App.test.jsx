@@ -5,6 +5,10 @@ import App from './App.jsx'
 
 const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one' }, logout: vi.fn() } }))
 vi.mock('./context/AuthContext.jsx', () => ({ useAuth: () => auth }))
+vi.mock('./pages/DashboardPage.jsx', () => ({ default: () => <div>Dashboard page</div> }))
+vi.mock('./pages/TransactionsPage.jsx', () => ({ default: () => <div>Ledger page</div> }))
+vi.mock('./pages/WealthPage.jsx', () => ({ default: () => <div>Wealth page</div> }))
+vi.mock('./pages/AnalysisPage.jsx', () => ({ default: () => <div>Analysis page</div> }))
 vi.mock('./pages/RulesPage.jsx', () => ({ default: () => <div>Rules page</div> }))
 vi.mock('./pages/AccountPage.jsx', () => ({ default: () => <div>Account settings</div> }))
 
@@ -17,31 +21,32 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Minerva navigation', () => {
-  it('redirects / and unknown paths to the Rules page', () => {
-    for (const path of ['/', '/activities', '/anything-else']) {
+  it('opens the dashboard at / and redirects unknown paths to it', () => {
+    for (const path of ['/', '/anything-else']) {
       cleanup()
       open(path)
-      expect(screen.getByText('Rules page')).toBeInTheDocument()
-      expect(window.location.pathname).toBe('/rules')
-      expect(navigation().getByRole('link', { name: 'Rules' })).toHaveAttribute('aria-current', 'page')
+      expect(screen.getByText('Dashboard page')).toBeInTheDocument()
+      expect(window.location.pathname).toBe('/')
+      expect(navigation().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
     }
   })
 
-  it('shows exactly the Rules and Account dock links and opens Account directly', async () => {
+  it('shows all six dock links and opens each section directly', async () => {
     const user = userEvent.setup()
-    open('/rules')
-    expect(screen.getByText('Rules page')).toBeInTheDocument()
-    expect(navigation().getAllByRole('link')).toHaveLength(2)
-    await user.click(navigation().getByRole('link', { name: 'Account' }))
-    expect(screen.getByText('Account settings')).toBeInTheDocument()
-    expect(navigation().getByRole('link', { name: 'Account' })).toHaveAttribute('aria-current', 'page')
+    open('/')
+    expect(navigation().getAllByRole('link')).toHaveLength(6)
+    for (const [label, text] of [['Ledger', 'Ledger page'], ['Wealth', 'Wealth page'], ['Analysis', 'Analysis page'], ['Rules', 'Rules page'], ['Account', 'Account settings']]) {
+      await user.click(navigation().getByRole('link', { name: label }))
+      expect(await screen.findByText(text)).toBeInTheDocument()
+      expect(navigation().getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page')
+    }
   })
 
   it('shows the login screen when signed out', () => {
     auth.user = null
     auth.loading = false
-    open('/rules')
-    expect(screen.queryByText('Rules page')).not.toBeInTheDocument()
+    open('/')
+    expect(screen.queryByText('Dashboard page')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
   })
 })
