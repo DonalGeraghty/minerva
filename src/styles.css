@@ -140,7 +140,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .demo-account-note h2 { margin: .35rem 1.5rem 0; font-size: 1.65rem; font-weight: 500; letter-spacing: -.04em; }
 
 .dock-outer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 50; display: flex; justify-content: center; height: 5.5rem; pointer-events: none; }
-.dock { position: absolute; bottom: calc(.75rem + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(calc(100% - 1rem), 22rem); gap: .15rem; padding: .45rem; border: 1px solid #2d2b25; border-radius: 1rem; background: rgb(7 7 6 / 94%); box-shadow: 0 1.5rem 4rem #000; backdrop-filter: blur(18px); pointer-events: auto; }
+.dock { position: absolute; bottom: calc(.75rem + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); width: min(calc(100% - 1rem), 36rem); gap: .15rem; padding: .45rem; border: 1px solid #2d2b25; border-radius: 1rem; background: rgb(7 7 6 / 94%); box-shadow: 0 1.5rem 4rem #000; backdrop-filter: blur(18px); pointer-events: auto; }
 .dock-item { position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: center; gap: .25rem; min-width: 0; min-height: 3.25rem; padding: .3rem .1rem; border: 1px solid transparent; border-radius: .7rem; color: #99958c; background: transparent; text-decoration: none; cursor: pointer; transition: color .18s, background .18s; }
 .dock-item:hover, .dock-item:focus-visible { color: #fff; background: #15130f; }
 .dock-item.is-current { border-color: #514a37; color: var(--gold); background: #17140e; }
@@ -177,3 +177,46 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .page-hero h1 { margin: 0; font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 500; letter-spacing: -.07em; line-height: 1; }
 .page-hero > p:last-child { max-width: 38rem; color: var(--muted); line-height: 1.7; }
 .app-panel { margin-bottom: 1.5rem; padding: clamp(1.2rem, 4vw, 2rem); border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); }
+/* Finance dashboard */
+.finance-page .page-hero h1 { margin: 0; font-size: clamp(3.4rem, 10vw, 6.4rem); font-weight: 500; letter-spacing: -.07em; line-height: .9; }
+.finance-page .page-hero p:not(.eyebrow) { max-width: 44rem; color: var(--soft); line-height: 1.6; }
+.period-picker { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem; }
+.period-picker label { display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
+.period-picker select, .period-picker input, .finance-filters select, .finance-filters input { min-height: 2.4rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .45rem; color: var(--text); background: #090909; color-scheme: dark; font-size: .75rem; }
+.finance-filters { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem; margin-bottom: 1rem; }
+.finance-filters label { display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
+.finance-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .8rem; margin: 1.25rem 0; }
+.finance-card { padding: 1rem; border: 1px solid var(--line); border-radius: .7rem; background: #0d0c0a; display: grid; gap: .35rem; }
+.finance-card span { color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; font-family: 'DM Mono', monospace; }
+.finance-card strong { font-size: 1.25rem; font-weight: 600; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.is-negative { color: #ff9d9d; }
+.finance-freshness { color: var(--muted); font-size: .75rem; }
+.finance-chart { display: block; width: 100%; height: auto; margin-top: 1rem; }
+.chart-axis { stroke: var(--line); stroke-width: 1; }
+.chart-label { fill: var(--muted); font-size: 10px; }
+.chart-value { fill: var(--soft); font-size: 10px; font-weight: 600; }
+.chart-value.is-negative { fill: #ff9d9d; }
+.bar-positive { fill: #a8d6b4; }
+.bar-negative { fill: #ff9d9d; }
+.trend-line { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; }
+.trend-dot { fill: var(--gold); }
+.finance-bars { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.finance-bars li { display: grid; grid-template-columns: minmax(6rem, 10rem) 1fr auto; align-items: center; gap: .7rem; font-size: .75rem; }
+.finance-bar-name { color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.finance-bar-track { height: .55rem; border-radius: 999px; background: #14120f; overflow: hidden; }
+.finance-bar { display: block; height: 100%; border-radius: 999px; background: #a8d6b4; min-width: 2px; }
+.finance-bar.is-negative { background: #ff9d9d; }
+.finance-bar-value { color: var(--soft); font-variant-numeric: tabular-nums; }
+.finance-bar-value.is-negative { color: #ff9d9d; }
+.finance-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .75rem; color: var(--soft); margin-top: 1rem; }
+.finance-table caption { text-align: left; margin-bottom: .6rem; color: var(--muted); }
+.finance-table th, .finance-table td { padding: .55rem .6rem; border-bottom: 1px solid var(--line); font-weight: 400; }
+.finance-table tr.is-excluded td { opacity: .5; }
+.finance-pager { margin-top: 1rem; justify-content: space-between; }
+.finance-pager span { color: var(--muted); font-size: .72rem; }
+.finance-two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 2rem; margin-top: 1.5rem; }
+.finance-subheading { margin: 1.5rem 0 0; font-size: 1.1rem; font-weight: 500; }
+.finance-empty { color: var(--muted); font-size: .8rem; }
+.finance-meta { color: var(--muted); font-size: .68rem; font-family: 'DM Mono', monospace; margin-top: .8rem; }
+.finance-warnings { margin: .8rem 0; padding-left: 1.2rem; color: #eadba8; font-size: .75rem; }
+@media (max-width: 46rem) { .dock { grid-template-columns: repeat(6, minmax(0, 1fr)); width: calc(100% - 1rem); } .dock-label { font-size: .52rem; } }

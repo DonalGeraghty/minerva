@@ -4,7 +4,11 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 
 ## Tabs
 
-- **Rules (`/rules`, also `/`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
+- **Dashboard (`/`):** period selector (this month default, last month, rolling 3/6/12, YTD, all time, custom whole months), Sync button with freshness/stale banner, income/spending/refunds/net/transfer/investment cards, monthly net waterfall (negative red, positive green), net trend, top categories, and data-quality warnings. Responses are pinned to one snapshot ID + rule-set version.
+- **Ledger (`/transactions`):** filterable, paginated transaction table (month, type, category, merchant, search, sorting) with the rule that interpreted each row and excluded/review flags.
+- **Wealth (`/wealth`):** net worth from the dated `snapshot` tab (subtotals never double counted), history table, sinking-fund recognised-balance ledger (provisional until the opening balance is verified), and an explicit budgets-unavailable state.
+- **Analysis (`/analysis`):** category waterfall by month, category and merchant bars, monthly totals — all server-side aggregates from Janus.
+- **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
 - **Account (`/account`):** connect, replace or disconnect your Google Sheets finance workbook, manage shared account settings, and sign out.
 
 ## Finance connection

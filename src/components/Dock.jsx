@@ -1,6 +1,10 @@
 import { NavLink } from 'react-router-dom'
 
 const items = [
+  { to: '/', label: 'Dashboard', icon: '◔', end: true },
+  { to: '/transactions', label: 'Ledger', icon: '▤' },
+  { to: '/wealth', label: 'Wealth', icon: '◈' },
+  { to: '/analysis', label: 'Analysis', icon: '▦' },
   { to: '/rules', label: 'Rules', icon: '≡' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
@@ -13,6 +17,7 @@ export default function Dock() {
           <NavLink
             key={item.to}
             to={item.to}
+            end={item.end}
             className={({ isActive }) => `dock-item${isActive ? ' is-current' : ''}`}
             aria-label={item.label}
           >
