@@ -86,3 +86,12 @@ export function monthLabel(month) {
 export function isMoneyNegative(value) {
   return Number(value ?? 0) < 0
 }
+
+export function financeChat(message, history, signal) {
+  return apiRequest('/api/finance/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history }),
+    signal,
+  })
+}

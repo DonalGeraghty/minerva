@@ -6,6 +6,7 @@ const items = [
   { to: '/wealth', label: 'Wealth', icon: '◈' },
   { to: '/analysis', label: 'Analysis', icon: '▦' },
   { to: '/rules', label: 'Rules', icon: '≡' },
+  { to: '/ask', label: 'Ask', icon: '✦' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
 

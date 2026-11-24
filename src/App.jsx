@@ -4,6 +4,7 @@ import Dock from './components/Dock.jsx'
 import { useAuth } from './context/AuthContext.jsx'
 import AccountPage from './pages/AccountPage.jsx'
 import AnalysisPage from './pages/AnalysisPage.jsx'
+import AskPage from './pages/AskPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
 import RulesPage from './pages/RulesPage.jsx'
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/wealth" element={<WealthPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
           <Route path="/rules" element={<RulesPage />} />
+          <Route path="/ask" element={<AskPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

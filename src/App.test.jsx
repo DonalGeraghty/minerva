@@ -10,6 +10,7 @@ vi.mock('./pages/TransactionsPage.jsx', () => ({ default: () => <div>Ledger page
 vi.mock('./pages/WealthPage.jsx', () => ({ default: () => <div>Wealth page</div> }))
 vi.mock('./pages/AnalysisPage.jsx', () => ({ default: () => <div>Analysis page</div> }))
 vi.mock('./pages/RulesPage.jsx', () => ({ default: () => <div>Rules page</div> }))
+vi.mock('./pages/AskPage.jsx', () => ({ default: () => <div>Ask page</div> }))
 vi.mock('./pages/AccountPage.jsx', () => ({ default: () => <div>Account settings</div> }))
 
 function open(path = '/') { window.history.replaceState({}, '', path); return render(<App />) }
@@ -31,11 +32,11 @@ describe('Minerva navigation', () => {
     }
   })
 
-  it('shows all six dock links and opens each section directly', async () => {
+  it('shows all seven dock links and opens each section directly', async () => {
     const user = userEvent.setup()
     open('/')
-    expect(navigation().getAllByRole('link')).toHaveLength(6)
-    for (const [label, text] of [['Ledger', 'Ledger page'], ['Wealth', 'Wealth page'], ['Analysis', 'Analysis page'], ['Rules', 'Rules page'], ['Account', 'Account settings']]) {
+    expect(navigation().getAllByRole('link')).toHaveLength(7)
+    for (const [label, text] of [['Ledger', 'Ledger page'], ['Wealth', 'Wealth page'], ['Analysis', 'Analysis page'], ['Rules', 'Rules page'], ['Ask', 'Ask page'], ['Account', 'Account settings']]) {
       await user.click(navigation().getByRole('link', { name: label }))
       expect(await screen.findByText(text)).toBeInTheDocument()
       expect(navigation().getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page')
