@@ -9,6 +9,7 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 - **Wealth (`/wealth`):** net worth from the dated `snapshot` tab (subtotals never double counted), history table, sinking-fund recognised-balance ledger (provisional until the opening balance is verified), and an explicit budgets-unavailable state.
 - **Analysis (`/analysis`):** category waterfall by month, category and merchant bars, monthly totals — all server-side aggregates from Janus.
 - **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
+- **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored; each answer shows the privacy note.
 - **Account (`/account`):** connect, replace or disconnect your Google Sheets finance workbook, manage shared account settings, and sign out.
 
 ## Finance connection
