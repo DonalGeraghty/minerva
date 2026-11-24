@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import {
   RULE_ACTIONS, RULE_FIELDS, RULE_OPERATORS, RULE_SCOPES, RULE_STATUSES, RULE_TYPES,
@@ -38,6 +39,7 @@ export default function RulesPage() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [errorCode, setErrorCode] = useState('')
   const [notice, setNotice] = useState('')
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -58,12 +60,16 @@ export default function RulesPage() {
     abort.current = controller
     setLoading(true)
     setError('')
+    setErrorCode('')
     try {
       const data = await listFinanceRules({ includeDeleted: true, signal: controller.signal })
       setRules(data.rules || [])
       setRuleSetVersion(data.rule_set_version || 0)
     } catch (requestError) {
-      if (requestError.name !== 'AbortError') setError(requestError.message || 'Could not load finance rules')
+      if (requestError.name !== 'AbortError') {
+        setError(requestError.message || 'Could not load finance rules')
+        setErrorCode(requestError.code || '')
+      }
     } finally {
       if (abort.current === controller) setLoading(false)
     }
@@ -263,7 +269,7 @@ export default function RulesPage() {
             <button className="primary-button" type="button" onClick={startCreate} disabled={busy}>Add rule</button>
           </div>
         </header>
-        {error && <p className="settings-message is-error" role="alert">{error}</p>}
+        {error && <p className="settings-message is-error" role="alert">{error}{errorCode === 'finance_not_connected' && <> <Link to="/account">Connect your workbook in Account.</Link></>}</p>}
         {notice && <p className="settings-message is-success" role="status">{notice}</p>}
 
         {preview && (
