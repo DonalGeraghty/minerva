@@ -34,7 +34,7 @@ describe('Garmin dashboard navigation', () => {
     expect(await screen.findByRole('heading', { name: 'Dashboard.' })).toBeInTheDocument()
     await waitFor(() => expect(getGarminSteps).toHaveBeenCalled())
     expect(window.location.pathname).toBe('/')
-    expect(navigation().getAllByRole('link')).toHaveLength(3)
+    expect(navigation().getAllByRole('link')).toHaveLength(4)
     expect(navigation().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
   })
 

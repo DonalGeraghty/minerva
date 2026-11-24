@@ -23,6 +23,10 @@ Generate your personal key on [Garmin Connect](https://connect.garmin.com/app/se
 
 The automated checks cover the integration with synthetic Garmin responses and mocked external services. A live Garmin smoke test requires a connected account and configured Google Cloud access.
 
+## Finance rules tab (`/rules`)
+
+The Rules tab manages the account-owned finance rule set through Janus `/api/finance/rules`. It lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel. Janus requires the signed-in account to be listed in `FINANCE_OWNER_EMAILS`; other accounts get a clear 403 message. The Google Sheet remains the canonical ledger — this page never writes to it.
+
 ## Planned dashboard expansion
 
 Dashboard and Activities tabs, seven dashboard panels, full activity measurements/workouts, and saved panel visibility are implemented. The former study interface has been removed. Remaining endpoint coverage, panel ordering, searchable/paginated activity history, and file downloads remain planned. The repository, deployment, shared Janus login, and account controls are retained. Aether remains the habit tracker.

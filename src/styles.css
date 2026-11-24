@@ -284,3 +284,26 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 @media (max-width: 46rem) {
   .page.garmin-page { width: calc(100% - 1rem); }
 }
+
+/* Finance rules page */
+.rules-page .garmin-hero h1 { margin: 0; font-size: clamp(3.4rem, 10vw, 6.4rem); font-weight: 500; letter-spacing: -.07em; line-height: .9; }
+.rules-page .garmin-hero p:not(.eyebrow) { max-width: 44rem; color: var(--soft); line-height: 1.6; }
+.rules-toolbar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem; }
+.rules-toolbar label { display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
+.rules-toolbar input, .rules-toolbar select { min-height: 2.4rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .45rem; color: var(--text); background: #090909; color-scheme: dark; font-size: .75rem; }
+.rules-toolbar input[type='search'] { width: 12rem; }
+.rules-import-summary, .rules-history { margin-top: 1.25rem; padding: 1rem; border: 1px dashed var(--line); border-radius: .6rem; font-size: .78rem; color: var(--soft); }
+.rules-import-summary ul, .rules-history { margin: .6rem 0; padding-left: 1.2rem; }
+.rules-import-summary li { margin: .2rem 0; }
+.rules-import-summary .primary-button { margin-top: .6rem; }
+.rule-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .8rem; margin-top: 1.25rem; }
+.rule-form label { display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
+.rule-form input, .rule-form select, .rule-form textarea { width: 100%; padding: .6rem; border: 1px solid var(--line); border-radius: .5rem; color: var(--text); background: #090909; color-scheme: dark; }
+.rule-form .garmin-actions { grid-column: 1 / -1; }
+.rules-badge { display: inline-block; padding: .15rem .5rem; border-radius: 999px; border: 1px solid var(--line); font-family: 'DM Mono', monospace; font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; }
+.rules-badge.is-active { border-color: #31503b; color: #a8d6b4; background: #0c160f; }
+.rules-badge.is-review { border-color: #5c5134; color: #eadba8; background: #15130c; }
+.rules-badge.is-disabled, .rules-badge.is-deleted { border-color: #38352d; color: var(--muted); background: #11100e; }
+tr.is-deleted td { opacity: .55; }
+.rules-row-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.rules-row-actions .secondary-button { min-height: 2rem; padding: .35rem .6rem; font-size: .68rem; }
