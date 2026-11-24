@@ -9,15 +9,15 @@ vi.mock('../context/AuthContext.jsx', () => ({ useAuth: () => ({
   user: { email: 'user@example.com', accountId: 'account-1' }, deleteAccount,
 }) }))
 vi.mock('../components/AISettings.jsx', () => ({ default: () => <div>AI settings</div> }))
-vi.mock('../components/GarminConnectionSettings.jsx', () => ({ default: () => <div>Garmin settings</div> }))
+vi.mock('../components/FinanceConnectionSettings.jsx', () => ({ default: () => <div>Finance settings</div> }))
 
-describe('Garmin account settings', () => {
+describe('Account settings', () => {
   beforeEach(() => vi.clearAllMocks())
   afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
-  it('keeps Garmin and shared AI controls without flashcard context settings', () => {
+  it('keeps the finance connection and shared AI controls without flashcard context settings', () => {
     render(<MemoryRouter><AccountPage /></MemoryRouter>)
-    expect(screen.getByText('Garmin settings')).toBeInTheDocument()
+    expect(screen.getByText('Finance settings')).toBeInTheDocument()
     expect(screen.getByText('AI settings')).toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: /existing cards/i })).not.toBeInTheDocument()
   })
