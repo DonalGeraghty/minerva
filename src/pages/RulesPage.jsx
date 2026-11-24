@@ -235,13 +235,13 @@ export default function RulesPage() {
   return (
     <main className="page rules-page">
       <Brand />
-      <section className="garmin-hero">
+      <section className="page-hero">
         <p className="eyebrow">Finance &middot; rule set v{ruleSetVersion}</p>
         <h1>Rules.</h1>
         <p>Upload a rules CSV or manage rules one by one. Janus stores them per account; the Google Sheet stays the canonical ledger.</p>
       </section>
 
-      <section className="garmin-panel" aria-label="Rule controls">
+      <section className="app-panel" aria-label="Rule controls">
         <header>
           <div>
             <p className="settings-kicker">Manage</p>
@@ -335,7 +335,7 @@ export default function RulesPage() {
       </section>
 
       {editing && (
-        <section className="garmin-panel" aria-label={editing === 'new' ? 'Add rule' : `Edit rule ${editing}`}>
+        <section className="app-panel" aria-label={editing === 'new' ? 'Add rule' : `Edit rule ${editing}`}>
           <header><div><p className="settings-kicker">{editing === 'new' ? 'New rule' : `Editing ${editing}`}</p><h2>{editing === 'new' ? 'Add a rule.' : 'Edit rule.'}</h2></div></header>
           <form onSubmit={saveRule} className="rule-form">
             <label>Rule ID<input value={form.rule_id} onChange={(event) => setField('rule_id')(event.target.value)} required pattern="[A-Za-z0-9_\-]{1,64}" disabled={editing !== 'new'} /></label>
@@ -352,7 +352,7 @@ export default function RulesPage() {
             <label>Source section<input value={form.source_section} onChange={(event) => setField('source_section')(event.target.value)} maxLength={200} /></label>
             <label>Description<textarea value={form.description} onChange={(event) => setField('description')(event.target.value)} maxLength={2000} rows={2} /></label>
             {formError && <p className="settings-message is-error" role="alert">{formError}</p>}
-            <div className="garmin-actions">
+            <div className="form-actions">
               <button className="primary-button" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save rule'}</button>
               <button className="secondary-button" type="button" onClick={closeEditor} disabled={busy}>Cancel</button>
             </div>
