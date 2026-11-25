@@ -1,49 +1,95 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import CashflowWaterfall from './CashflowWaterfall.jsx'
-import TransactionsPage from '../pages/TransactionsPage.jsx'
-import { getTransactions } from '../services/finance.js'
+import { getCashflowBreakdown } from '../services/finance.js'
 
-vi.mock('../services/finance.js', async (original) => ({ ...await original(), getTransactions: vi.fn() }))
+vi.mock('../services/finance.js', () => ({ getCashflowBreakdown: vi.fn() }))
+const meta = { snapshot_id: 'snapshot', rule_set_version: 3 }
 const flow = [{ month: '2026-10', net: '-100.00' }, { month: '2026-11', net: '300.00' }]
-beforeEach(() => {
-  getTransactions.mockReset().mockResolvedValue({
-    meta: { snapshot_id: 'snapshot', rule_set_version: 1, coverage: { months: ['2026-10', '2026-11'] } },
-    total: 0, transactions: [],
-  })
-})
+const items = [
+  { type: 'Income', category: 'Salary', amount_eur: '1000.00' },
+  { type: 'Expense', category: 'Groceries', amount_eur: '-800.00' },
+  { type: 'Expense', category: 'Housing', amount_eur: '-350.00' },
+  { type: 'Refund', category: 'Groceries', amount_eur: '50.00' },
+]
+const response = { meta, cashflow: [{ month: '2026-10', items }] }
+beforeEach(() => getCashflowBreakdown.mockReset().mockResolvedValue(response))
 afterEach(cleanup)
+function renderChart() { return render(<CashflowWaterfall data={flow} total="200.00" meta={meta} />) }
+const monthButton = () => screen.getByRole('button', { name: /^Oct 2026:/ })
 
-function renderChart(period = { start: '2026-10', end: '2026-11' }) {
-  return render(<MemoryRouter><Routes>
-    <Route path="/" element={<CashflowWaterfall data={flow} total="200.00" period={period} />} />
-    <Route path="/transactions" element={<TransactionsPage />} />
-  </Routes></MemoryRouter>)
-}
-
-it.each(['2026-10', '2026-11'])('opens the Ledger for month %s with its filters applied', async (month) => {
+it('replaces the monthly chart with categories and restores months, focus and scroll on Back', async () => {
   const user = userEvent.setup()
   renderChart()
-  const link = screen.getAllByRole('link').find((item) => item.getAttribute('href') === `/transactions?start=${month}&end=${month}`)
-  await user.click(link)
-  await screen.findByRole('heading', { name: 'Ledger.' })
-  expect(screen.getByLabelText('From (YYYY-MM)')).toHaveValue(month)
-  expect(screen.getByLabelText('To (YYYY-MM)')).toHaveValue(month)
-  await waitFor(() => expect(getTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ period: 'custom', start: month, end: month, offset: 0 }), expect.any(AbortSignal)))
+  screen.getByRole('region').scrollLeft = 75
+  await user.click(monthButton())
+  expect(await screen.findByRole('group', { name: 'Oct 2026 category cash flow waterfall' })).toBeInTheDocument()
+  expect(screen.queryByRole('group', { name: 'Monthly net cash flow waterfall' })).not.toBeInTheDocument()
+  expect(screen.getByRole('img', { name: /^Expense · Groceries:/ })).toHaveAccessibleName(/-€800/)
+  expect(screen.getByRole('img', { name: /^Refund · Groceries:/ })).toHaveAccessibleName(/€50/)
+  expect(screen.getByRole('img', { name: /^Net total:/ })).toHaveAccessibleName(/-€100/)
+  expect(getCashflowBreakdown).toHaveBeenCalledWith('2026-10', expect.any(AbortSignal))
+  await user.click(screen.getByRole('button', { name: /Back to months/ }))
+  expect(screen.getByRole('group', { name: 'Monthly net cash flow waterfall' })).toBeInTheDocument()
+  await waitFor(() => expect(monthButton()).toHaveFocus())
+  expect(screen.getByRole('region').scrollLeft).toBe(75)
 })
 
-it('opens the total for the entire selected period', async () => {
+it.each(['Enter', ' '])('supports keyboard activation with %s', async (key) => {
+  renderChart()
+  fireEvent.keyDown(monthButton(), { key })
+  await screen.findByRole('heading', { name: 'Oct 2026 breakdown' })
+  expect(screen.getByRole('button', { name: /Back to months/ })).toHaveFocus()
+  await screen.findByRole('group', { name: 'Oct 2026 category cash flow waterfall' })
+})
+
+it('keeps totals and categories informational', async () => {
   const user = userEvent.setup()
   renderChart()
-  await user.click(screen.getByRole('link', { name: /View selected period transactions/ }))
-  await waitFor(() => expect(getTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ period: 'custom', start: '2026-10', end: '2026-11' }), expect.any(AbortSignal)))
+  await user.click(screen.getByRole('img', { name: /^Net total:/ }))
+  expect(getCashflowBreakdown).not.toHaveBeenCalled()
+  await user.click(monthButton())
+  await screen.findByRole('group', { name: 'Oct 2026 category cash flow waterfall' })
+  expect(screen.getAllByRole('button')).toHaveLength(1)
 })
 
-it('opens an unbounded total in the all-time Ledger', async () => {
+it.each([
+  { ...response, meta: { ...meta, snapshot_id: 'other' } },
+  { ...response, meta: { ...meta, rule_set_version: 4 } },
+  { ...response, cashflow: [{ month: '2026-10', items: items.slice(0, 2) }] },
+  { ...response, cashflow: [] },
+])('rejects inconsistent or missing category data', async (value) => {
+  getCashflowBreakdown.mockResolvedValue(value)
   const user = userEvent.setup()
-  renderChart({ start: null, end: null })
-  await user.click(screen.getByRole('link', { name: /View selected period transactions/ }))
-  await waitFor(() => expect(getTransactions).toHaveBeenLastCalledWith(expect.objectContaining({ period: 'all', start: '', end: '' }), expect.any(AbortSignal)))
+  renderChart()
+  await user.click(monthButton())
+  await screen.findByRole('alert')
+  expect(screen.queryByRole('group', { name: /category cash flow waterfall/ })).not.toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: /Back to months/ }))
+  expect(monthButton()).toBeInTheDocument()
+})
+
+it('allows retry after a failed request', async () => {
+  getCashflowBreakdown.mockRejectedValueOnce(new Error('Connection interrupted'))
+  const user = userEvent.setup()
+  renderChart()
+  await user.click(monthButton())
+  expect(await screen.findByRole('alert')).toHaveTextContent('Connection interrupted')
+  await user.click(screen.getByRole('button', { name: 'Try again' }))
+  await screen.findByRole('group', { name: 'Oct 2026 category cash flow waterfall' })
+})
+
+it('ignores a response arriving after Back', async () => {
+  let resolve
+  getCashflowBreakdown.mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+  const user = userEvent.setup()
+  renderChart()
+  await user.click(monthButton())
+  const signal = getCashflowBreakdown.mock.calls[0][1]
+  await user.click(screen.getByRole('button', { name: /Back to months/ }))
+  expect(signal.aborted).toBe(true)
+  resolve(response)
+  await waitFor(() => expect(monthButton()).toBeInTheDocument())
+  expect(screen.queryByRole('heading', { name: 'Oct 2026 breakdown' })).not.toBeInTheDocument()
 })

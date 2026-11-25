@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { waterfallSteps } from './waterfall.js'
+import { categoryWaterfallSteps, waterfallSteps } from './waterfall.js'
 
 describe('waterfall positions', () => {
+  it('builds income, spending and refund steps in cents to the exact monthly net', () => {
+    const items = [{ type: 'Refund', category: 'Food', amount_eur: '0.10' }, { type: 'Expense', category: 'Food', amount_eur: '-2.20' }, { type: 'Income', category: 'Salary', amount_eur: '1.10' }]
+    const steps = categoryWaterfallSteps(items, '-1.00')
+    expect(steps.map((step) => [step.start, step.end])).toEqual([[0, 110], [110, -110], [-110, -100], [0, -100]])
+    expect(() => categoryWaterfallSteps(items, '0')).toThrow('do not match')
+    expect(() => categoryWaterfallSteps([...items, items[0]], '-0.90')).toThrow('needs review')
+    expect(() => categoryWaterfallSteps([{ ...items[0], amount_eur: null }], '0')).toThrow('unavailable')
+    expect(categoryWaterfallSteps([], '0').at(-1).end).toBe(0)
+  })
   it('connects monthly changes across zero and anchors the total to zero', () => {
     expect(waterfallSteps([{ month: '2026-03', net: '100.00' }, { month: '2026-01', net: '-120.00' }, { month: '2026-02', net: '50.00' }], '30.00')).toEqual([
       { key: '2026-01', change: -12000, start: 0, end: -12000 },

@@ -1,4 +1,4 @@
-.dashboard-page { width: min(calc(100% - 3rem), 72rem); }
+.page.dashboard-page { width: min(calc(100% - clamp(2rem, 5vw, 10rem)), 220rem); }
 .dashboard-hero { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 2rem; padding: 1.8rem 0 1.5rem; }
 .dashboard-hero .eyebrow { grid-column: 1 / -1; }
 .dashboard-hero h1 { margin: 0; color: #f3f0e7; font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 500; letter-spacing: -.065em; line-height: 1.1; }
@@ -20,21 +20,26 @@
 .legend-negative { background: #d58d87; }
 .legend-total { background: #d8bf83; }
 .waterfall-visual { position: relative; margin: 0 .8rem; }
-.waterfall-scroll { width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #62563c #12130f; }
+.waterfall-scroll { width: 100%; height: clamp(24rem, 48svh, 48rem); overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #62563c #12130f; }
 .waterfall-scroll svg { display: block; width: 100%; height: auto; }
 .waterfall-grid line { stroke: #292c23; stroke-width: 1; stroke-dasharray: 3 6; }
-.waterfall-grid text, .waterfall-zero text { fill: #8e9384; font-size: 10px; font-family: 'DM Mono', monospace; }
+.waterfall-grid text, .waterfall-zero text { fill: #a2a795; font-size: 12px; font-family: 'DM Mono', monospace; }
 .waterfall-zero line { stroke: #656858; stroke-width: 1; }
 .waterfall-connector { stroke: #8c8d795c; stroke-width: 1; stroke-dasharray: 3 4; }
-.waterfall-step { outline: none; cursor: pointer; text-decoration: none; transition: opacity 160ms ease; }
+.waterfall-step { outline: none; transition: opacity 160ms ease; }
+.waterfall-step.is-interactive { cursor: pointer; }
+.waterfall-drilldown { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; padding: 1.2rem; }
+.waterfall-drilldown h3 { margin: 0; color: #e9e2cf; font-size: 1.1rem; font-weight: 500; }
+.waterfall-drilldown p { flex-basis: 100%; margin: 0; color: #aaa79d; font-size: .75rem; }
+.waterfall-detail-message { min-height: 20rem; display: grid; align-content: center; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; color: #b6b6a7; }
 .waterfall-step.is-muted { opacity: .4; }
 .waterfall-column { stroke: #ffffff12; stroke-width: 1; transition: filter 160ms ease; }
 .waterfall-step:focus .waterfall-column, .waterfall-step:hover .waterfall-column { stroke: #f4ecc8; stroke-width: 1.5; filter: brightness(1.1); }
-.waterfall-value { fill: #c9d6ca; font-size: 11px; font-family: 'DM Mono', monospace; }
+.waterfall-value { fill: #c9d6ca; font-size: 13px; font-family: 'DM Mono', monospace; }
 .waterfall-step.is-negative .waterfall-value { fill: #e6a49d; }
 .waterfall-step.is-total .waterfall-value { fill: #e2cfa1; }
-.waterfall-month { fill: #d0d0c2; font-size: 12px; }
-.waterfall-year { fill: #868b7b; font-size: 9px; }
+.waterfall-month { fill: #d0d0c2; font-size: 13px; }
+.waterfall-year { fill: #a2a795; font-size: 11px; }
 .waterfall-insight { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .65rem; min-height: 2.7rem; padding: .5rem; color: #959c8b; font-size: .68rem; }
 .waterfall-insight strong { color: #e3dfd2; font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 400; }
 .waterfall-empty { display: grid; justify-items: center; gap: .6rem; padding: 4rem 1.5rem; text-align: center; }
@@ -56,7 +61,7 @@
 @keyframes cashflow-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .cashflow-loading > span { animation: none; } .waterfall-step, .waterfall-column { transition: none; } }
 @media (max-width: 42rem) {
-  .dashboard-page { width: calc(100% - 1rem); }
+  .page.dashboard-page { width: calc(100% - 1rem); }
   .dashboard-hero { grid-template-columns: 1fr; gap: .6rem; padding: 2rem .5rem 1.5rem; }
   .dashboard-hero > p:last-child { max-width: none; }
   .cashflow-heading { padding: 1.25rem; }
@@ -66,4 +71,20 @@
   .waterfall-legend { justify-content: flex-start; gap: .8rem; padding-inline: 1.25rem; }
   .cashflow-footer, .cashflow-quality { padding: 1rem 1.25rem; }
   .dashboard-message { margin: 1rem 1.25rem; }
+  .waterfall-drilldown { align-items: flex-start; padding-inline: .5rem; }
+  .waterfall-drilldown h3 { flex-basis: 100%; }
+  .cashflow-heading .period-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+  .cashflow-heading .period-picker select, .cashflow-heading .period-picker input { min-height: 2.75rem; font-size: 1rem; }
+}
+@media (min-width: 100rem) {
+  .dashboard-hero { padding-block: 2.5rem; }
+  .waterfall-value, .waterfall-month { font-size: 16px; }
+  .waterfall-year { font-size: 13px; }
+  .waterfall-grid text, .waterfall-zero text { font-size: 14px; }
+  .dashboard-hero > p:last-child { max-width: 24rem; font-size: 1rem; }
+  .cashflow-heading { padding: 2rem 2.5rem; }
+  .cashflow-total { font-size: clamp(3rem, 3vw, 5rem); }
+  .cashflow-total-label, .cashflow-period, .cashflow-heading .period-picker label { font-size: .9rem; }
+  .cashflow-heading .period-picker select, .cashflow-heading .period-picker input { font-size: 1rem; min-height: 3rem; }
+  .waterfall-legend span, .waterfall-insight, .cashflow-footer > p, .cashflow-footer > div, .cashflow-quality { font-size: .9rem; }
 }

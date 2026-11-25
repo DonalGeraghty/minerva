@@ -40,7 +40,7 @@ export default function AskPage() {
   }
 
   return (
-    <main className="page finance-page">
+    <main className="page finance-page ask-page">
       <Brand />
       <section className="page-hero">
         <p className="eyebrow">Finance &middot; ask AI</p>
