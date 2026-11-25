@@ -62,4 +62,25 @@ describe('Ask page', () => {
     expect(alert.querySelector('a')).toHaveTextContent('Import your ledger in Account')
   })
 
+  it('formats assistant Markdown while preserving literal questions and raw conversation history', async () => {
+    const user = userEvent.setup()
+    const question = 'Show **this** literally'
+    const answer = '**What is available:**\n\n- **Groceries:** €82.34\n- Snapshot: `snapshot_id`\n\n| Month | Spending |\n| --- | --- |\n| October | €82.34 |'
+    finance.financeChat.mockResolvedValue({ status: 'success', answer, meta: META })
+    await renderPage()
+    await user.type(screen.getByLabelText('Ask a finance question'), question)
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(await screen.findByText('What is available:')).toHaveProperty('tagName', 'STRONG')
+    expect(screen.getByText('Groceries:')).toHaveProperty('tagName', 'STRONG')
+    expect(screen.getByText('snapshot_id')).toHaveProperty('tagName', 'CODE')
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+    expect(screen.getByRole('table')).toHaveTextContent('October')
+    expect(screen.getByText(question)).toHaveProperty('tagName', 'P')
+    await user.type(screen.getByLabelText('Ask a finance question'), 'And next month?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(finance.financeChat).toHaveBeenLastCalledWith('And next month?', [
+      { role: 'user', content: question }, { role: 'assistant', content: answer },
+    ], expect.any(AbortSignal))
+  })
+
 })
