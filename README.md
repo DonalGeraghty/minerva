@@ -25,9 +25,13 @@ disabled and reference-only rules do not execute. Ledger entries preserve the
 source values alongside interpreted values. Charts aggregate the same interpreted
 ledger in Janus. Source transactions can be viewed before rules are imported.
 
-Before the Rules tab works, connect your own workbook on the Account page: paste a Google OAuth access token with the read-only `https://www.googleapis.com/auth/spreadsheets.readonly` scope (for example from the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)) and the workbook ID from your Sheets URL. Janus stores the token KMS-encrypted per account — the same model as the AI provider keys — and only ever reads the workbook; your ChatGPT workflow keeps writing the ledger. Until a connection exists, finance routes return `403 finance_not_connected` and the Rules tab shows a connect link. Playground access tokens expire after about an hour; use "Replace token" in Account when that happens. The browser only ever sees safe metadata (workbook ID, token last four).
+Connect the workbook in Account: copy the displayed reader email, share your Sheet with it as **Viewer**, paste the spreadsheet link or ID, then choose **Connect and import**. Access renews automatically; no token entry is required. The server must first approve the workbook for your existing Janus account. Knowing another user's spreadsheet link does not grant access.
 
-The architecture is `Minerva -> Janus API -> Google Sheets (read-only)`. Janus uses Cloud KMS for credentials and Firestore for account-owned rules and settings. No new Google Cloud service or dependency is required.
+Janus uses a dedicated, keyless service account with read-only Sheets scope. Setup and administrator approval commands are documented in the Janus repository. Until configuration and approval are complete, Account explains what is missing and disables Connect. Existing token connections can still import data until successfully migrated through the new form.
+
+Connecting verifies access and the ledger header before replacing a saved connection. Import success is confirmed separately with the transaction count. Failed verification preserves the existing connection; failed imports can be retried. Disconnect clears imported data and retains rules. To revoke the reader's Google access too, remove its email from the Sheet's sharing settings.
+
+The architecture is `Minerva -> Janus API -> Google Sheets (read-only)`. Your ChatGPT workflow keeps writing the ledger.
 
 ## Demo
 

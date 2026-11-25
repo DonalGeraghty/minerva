@@ -16,3 +16,6 @@
 .finance-import-status h3 { margin: 0; color: var(--text); font-size: 1rem; font-weight: 500; }
 .finance-import-status p { margin: .4rem 0 0; color: #aaa69c; font-size: .75rem; }
 @media (max-width: 40rem) { .finance-setup-flow { grid-template-columns: 1fr; gap: .5rem; } }
+.finance-reader-address { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0; }
+.finance-reader-address label { flex-basis: 100%; }
+.finance-reader-address input { flex: 1 1 280px; min-width: 0; font-size: .86rem; }
