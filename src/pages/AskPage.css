@@ -28,4 +28,7 @@
 .chat-form input { flex: 1; min-width: 0; min-height: 2.8rem; padding: .7rem .9rem; border: 1px solid #2d2b25; border-radius: .55rem; color: var(--text); background: #12110d; font-size: .8rem; }
 .chat-form input:focus-visible { outline: 1px solid var(--gold); border-color: var(--gold); }
 .chat-answer-meta { display: block; margin-top: .7rem; color: var(--muted); font-size: .65rem; overflow-wrap: anywhere; }
+.chat-sources { margin-top: .8rem; color: var(--soft); font-size: .7rem; }
+.chat-sources summary { cursor: pointer; color: var(--gold); }
+.chat-sources ul { padding-left: 1.2rem; line-height: 1.7; }
 @media (max-width: 42rem) { .chat-form input { width: 100%; min-width: 0; min-height: 2.75rem; font-size: 1rem; } }

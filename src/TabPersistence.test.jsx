@@ -74,7 +74,7 @@ it('retains pending and failed Ask status when returning to the tab', async () =
   await user.click(screen.getByRole('button', { name: 'Ask' }))
   await user.click(nav('Account'))
   await user.click(nav('Ask'))
-  expect(screen.getByText('Thinking…')).toBeInTheDocument()
+  expect(screen.getByText('Checking your ledger…')).toBeInTheDocument()
   expect(screen.getByLabelText('Ask a finance question')).toBeDisabled()
   expect(finance.financeChat).toHaveBeenCalledTimes(1)
   await act(async () => pending.resolve(Promise.reject(new Error('Provider unavailable'))))

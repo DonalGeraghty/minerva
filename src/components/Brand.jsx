@@ -4,7 +4,7 @@ export default function Brand() {
   return (
     <Link className="brand" to="/" aria-label="Minerva home">
       <span className="brand-mark" aria-hidden="true">M</span>
-      <span>Minerva</span>
+      <span className="brand-wordmark">Minerva<small>Your finance agent</small></span>
     </Link>
   )
 }

@@ -43,9 +43,9 @@ export default function LoginSplash() {
         <section className="auth-intro">
           <Brand />
           <div>
-            <p className="eyebrow">Your finances, together</p>
-            <h1>Your money.<br />In view.</h1>
-            <p>Connect your Google Sheets workbook to explore cash flow, transactions and rules in one private dashboard.</p>
+            <p className="eyebrow">Your personal finance agent</p>
+            <h1>Your money.<br />Understood.</h1>
+            <p>Ask a question. Minerva checks your numbers, finds the relevant detail and brings your finances into focus.</p>
           </div>
         </section>
         <section className="auth-panel" aria-labelledby="auth-title">

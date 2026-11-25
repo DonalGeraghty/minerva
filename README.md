@@ -1,6 +1,6 @@
 # Minerva
 
-Minerva is a private personal finance dashboard built with React and Vite. It reads your own Google Sheets finance workbook through the shared Janus API and adds a rules editor on top. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx. The former Garmin dashboard has been removed.
+Minerva is a personal finance agent and private dashboard built with React and Vite. It reads your own Google Sheets finance workbook through the shared Janus API and adds a rules editor on top. It shares Janus accounts, encrypted AI-provider credentials, and provider/model selection with Aether and Nyx. The former Garmin dashboard has been removed.
 
 ## Tabs
 
@@ -8,7 +8,7 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 - **Budget (`/budget`):** One responsive D3 chart with category spending, AI-set limits and remaining amounts. Switch Save more, Balanced or More flexibility instantly; Update with AI assesses the current month and six prior months. Click a bar for recorded merchants, upcoming bills and the reasoning. Plans and selected modes survive tab navigation in the current account session.
 - **Ledger (`/transactions`):** filterable, paginated transaction table (month, type, category, merchant, search, sorting) with the rule that interpreted each row and excluded/review flags.
 - **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
-- **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored on the server. The current conversation stays in browser memory during navigation; each answer retains its original provenance.
+- **Ask (`/ask`):** ask your selected AI provider about the synced ledger. Minerva chooses read-only Janus tools for exact period/category/merchant totals, breakdowns, comparisons and small transaction pages. Janus performs the calculations against one pinned snapshot/rule version. Replies show sources checked alongside provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored on the server. The current conversation stays in browser memory during navigation; each answer retains its original provenance.
 - **Account (`/account`):** connect, replace or disconnect your Google Sheets finance workbook, manage shared account settings, and sign out.
 - **Instructions (`/instructions`):** a human setup guide and copyable/downloadable LLM brief covering navigation, Sheet sharing and approval, ledger columns, manual/CSV rules, supported actions, review-first activation, and provider API-key/model setup. Includes a synthetic example CSV and official provider links. The rule brief uses the application's existing field/operator enums.
 
@@ -90,3 +90,9 @@ For local development, point `VITE_JANUS_API_URL` at a Janus instance and provid
 ## Frontend code layout
 
 `context/TabSessionContext.jsx` owns account-scoped tab state, pending-request cleanup and scroll restoration. The Ask and Budget request flows live in `hooks/useAskConversation.js` and `hooks/useBudgetPlan.js`. API modules in `services/` handle transport; reusable money formatting and file downloads live in `lib/finance.js` and `lib/download.js`. Page and chart styles live beside their components; `styles.css` contains the shared theme and controls.
+
+## Read-only finance agent
+
+Ask starts with a small current-month overview, coverage and freshness. Native tool calling on OpenAI, Anthropic and Mistral lets the model request only relevant results from Janus. Each result labels dates, filters, refunds, coverage gaps and pagination. Questions such as “groceries last month” can retrieve the exact monthly total without sending a transaction dump. The Sources checked detail shows successful queries for each answer.
+
+Janus allows three query rounds, at most six executed queries and two per round, followed by one final answer call. Tool results are limited to 8 KB each and 24 KB across an answer, with a 75-second orchestration deadline and per-call timeouts. The agent has no write, arbitrary SQL, external network or account-selection tools. The local demo still blocks external AI calls. Deploy the Janus agent backend before this branding update; the UI tolerates answers without source metadata.

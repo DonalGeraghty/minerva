@@ -33,6 +33,8 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold); o
 .page { position: relative; z-index: 1; width: min(100% - 2rem, 68rem); min-height: 100vh; margin-inline: auto; padding: 1.25rem 0 8rem; }
 .brand { display: flex; align-items: center; gap: .65rem; color: var(--soft); font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .brand-mark { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; border: 1px solid #756847; border-radius: 50%; color: var(--gold); font-family: Georgia, serif; font-size: .8rem; box-shadow: 0 0 1.1rem rgb(209 181 109 / 18%); }
+.brand-wordmark { display: grid; gap: .22rem; }
+.brand-wordmark small { color: var(--muted); font-size: .5rem; font-weight: 400; letter-spacing: .12em; }
 .eyebrow { margin: 0 0 .9rem; color: var(--gold); font-family: 'DM Mono', monospace; font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; }
 @media (max-width: 38rem) {
   .page { width: min(100% - 1rem, 68rem); padding-top: .8rem; }
