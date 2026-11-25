@@ -54,8 +54,8 @@ export function getBudgetContext(signal) {
   return apiRequest('/api/finance/budget/context', { signal })
 }
 
-export function createBudgetPlan(body, signal) {
+export function createBudgetPlan(signal) {
   return apiRequest('/api/finance/budget/plan', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal,
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal,
   })
 }

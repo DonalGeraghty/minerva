@@ -2,7 +2,7 @@ import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
-import { downloadText } from '../services/financeRules.js'
+import { downloadText } from '../lib/download.js'
 import { EXAMPLE_RULES, LLM_RULE_BRIEF, SHEET_HEADER } from '../lib/ruleGuide.js'
 import './InstructionsPage.css'
 

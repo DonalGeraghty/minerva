@@ -2,12 +2,14 @@ import { useTabState } from '../context/TabSessionContext.jsx'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { extent, scaleBand, scaleLinear } from 'd3'
 import { getCashflowBreakdown } from '../services/finance.js'
-import { eur, monthLabel } from '../lib/finance.js'
+import { eur, eurCents, monthLabel } from '../lib/finance.js'
 import { categoryWaterfallSteps, waterfallSteps } from './waterfall.js'
 
-function signedEuro(cents, decimals = 2) {
-  return new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', signDisplay: 'exceptZero', maximumFractionDigits: decimals, minimumFractionDigits: decimals }).format(cents / 100)
-}
+const signedFormatters = new Map([0, 2].map((decimals) => [decimals,
+  new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', signDisplay: 'exceptZero', maximumFractionDigits: decimals, minimumFractionDigits: decimals }),
+]))
+const axisFormatter = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', notation: 'compact', maximumFractionDigits: 1 })
+const signedEuro = (cents, decimals = 2) => signedFormatters.get(decimals).format(cents / 100)
 
 function labelLines(label) {
   const words = label.match(/\S.{0,16}(?:\s|$)|\S{1,17}/g) || [label]
@@ -96,7 +98,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
   const y = scaleLinear([Math.min(0, low) - span * .12, Math.max(0, high) + span * .18], [height - margin.bottom, margin.top]).nice(5)
   const active = steps.find((step) => step.key === activeKey)
   const stepLabel = (step) => step.total ? 'Net total' : selectedMonth ? `${step.type} · ${step.label}` : monthLabel(step.key)
-  const describe = (step) => `${stepLabel(step)}: ${signedEuro(step.change)}${step.total ? '' : `; running net ${eur(step.end / 100)}`}`
+  const describe = (step) => `${stepLabel(step)}: ${signedEuro(step.change)}${step.total ? '' : `; running net ${eurCents(step.end)}`}`
   const ticks = y.ticks(5)
   if (!ticks.includes(0)) ticks.push(0)
   return <div className="waterfall-visual">{toolbar}
@@ -104,7 +106,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }} role="group" aria-label={chartTitle} aria-describedby={`${id}-description`}>
         <title>{chartTitle}</title><desc id={`${id}-description`}>{selectedMonth ? "Starting at zero, income, spending categories and refunds build to the selected month’s net cash flow." : "Starting at zero for this period, each month adds or subtracts its net cash flow. Select a month for its category breakdown."} The gold column is the net total. This is not an account balance.</desc>
         <defs>{[['positive', '#9bd6b5', '#579d7b'], ['negative', '#e5a09a', '#bb6c68'], ['total', '#e7d4a2', '#ad9156']].map(([name, from, to]) => <linearGradient key={name} id={`${id}-${name}`} x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor={from} /><stop offset="100%" stopColor={to} /></linearGradient>)}</defs>
-        {ticks.map((tick) => <g key={tick} className={tick === 0 ? 'waterfall-zero' : 'waterfall-grid'}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 15} y={y(tick) + 4} textAnchor="end">{new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', notation: 'compact', maximumFractionDigits: 1 }).format(tick / 100)}</text></g>)}
+        {ticks.map((tick) => <g key={tick} className={tick === 0 ? 'waterfall-zero' : 'waterfall-grid'}><line x1={margin.left} x2={width - margin.right} y1={y(tick)} y2={y(tick)} /><text x={margin.left - 15} y={y(tick) + 4} textAnchor="end">{axisFormatter.format(tick / 100)}</text></g>)}
         {steps.slice(0, -1).map((step, index) => <line key={step.key} className="waterfall-connector" x1={columnX(step.key) + columnWidth} x2={columnX(steps[index + 1].key)} y1={y(step.end)} y2={y(step.end)} />)}
         {steps.map((step) => {
           const top = y(Math.max(step.start, step.end))
@@ -121,7 +123,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
         })}
       </svg>
     </div>
-    <div className="waterfall-insight" aria-live="polite">{active ? <><span>{stepLabel(active)}</span><strong>{signedEuro(active.change)}</strong><span>{active.total ? 'Net cash flow' : `Running net ${eur(active.end / 100)}`}{!selectedMonth && !active.total && ' · Select for category breakdown'}</span></> : <span>{selectedMonth ? 'Income rises, spending falls, and refunds contribute to the final monthly net. Hover or focus a column for exact figures.' : 'Select a month to see income, spending categories and refunds.'}</span>}</div>
-    <table className="sr-only"><caption>{selectedMonth ? `${monthLabel(selectedMonth)} category cash flow figures in EUR` : 'Monthly cash flow figures in EUR'}</caption><thead><tr><th>{selectedMonth ? 'Category' : 'Month'}</th><th>Net cash flow</th><th>Running net</th></tr></thead><tbody>{steps.map((step) => <tr key={step.key}><th>{stepLabel(step)}</th><td>{signedEuro(step.change)}</td><td>{eur(step.end / 100)}</td></tr>)}</tbody></table>
+    <div className="waterfall-insight" aria-live="polite">{active ? <><span>{stepLabel(active)}</span><strong>{signedEuro(active.change)}</strong><span>{active.total ? 'Net cash flow' : `Running net ${eurCents(active.end)}`}{!selectedMonth && !active.total && ' · Select for category breakdown'}</span></> : <span>{selectedMonth ? 'Income rises, spending falls, and refunds contribute to the final monthly net. Hover or focus a column for exact figures.' : 'Select a month to see income, spending categories and refunds.'}</span>}</div>
+    <table className="sr-only"><caption>{selectedMonth ? `${monthLabel(selectedMonth)} category cash flow figures in EUR` : 'Monthly cash flow figures in EUR'}</caption><thead><tr><th>{selectedMonth ? 'Category' : 'Month'}</th><th>Net cash flow</th><th>Running net</th></tr></thead><tbody>{steps.map((step) => <tr key={step.key}><th>{stepLabel(step)}</th><td>{signedEuro(step.change)}</td><td>{eurCents(step.end)}</td></tr>)}</tbody></table>
   </div>
 }

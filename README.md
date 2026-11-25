@@ -5,7 +5,7 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 ## Tabs
 
 - **Dashboard (`/`):** a D3 monthly net waterfall, with a six-month default and selectable presets/custom whole-month ranges. The waterfall builds a running net from zero and shows a gold period total. Select a month to replace the chart with its income, spending categories and refunds, ending at the same monthly net. Back to months restores the original waterfall and date range. Month columns support mouse, touch, and keyboard navigation; category bars and totals are informational. It reconciles in exact cents against Janus monthly totals and rejects mixed snapshot/rule versions. Import controls live in Account; data notes, gaps and stale indicators remain visible.
-- **Budget (`/budget`):** AI-assisted mid-month planning using this month and six complete prior months. Generate Save more, Balanced and More breathing room in one assessment, compare spending bars with limit/forecast markers, edit limits and income/bill assumptions, add upcoming context, and reassess explicitly. Actuals refresh against fixed targets. Projections protect expected bills, disclose funding gaps and avoid counting received income twice. Plans and edits survive tab navigation in the current account session.
+- **Budget (`/budget`):** One responsive D3 chart with category spending, AI-set limits and remaining amounts. Switch Save more, Balanced or More flexibility instantly; Update with AI assesses the current month and six prior months. Click a bar for recorded merchants, upcoming bills and the reasoning. Plans and selected modes survive tab navigation in the current account session.
 - **Ledger (`/transactions`):** filterable, paginated transaction table (month, type, category, merchant, search, sorting) with the rule that interpreted each row and excluded/review flags.
 - **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
 - **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored on the server. The current conversation stays in browser memory during navigation; each answer retains its original provenance.
@@ -60,11 +60,11 @@ Production builds exclude the demo credentials.
 
 ## Budget planning
 
-Open Budget and review the import date, latest transaction date and history gaps. Add optional upcoming context and a monthly unallocated cash cushion, then choose **Plan the rest of this month**. Relevant financial history and notes are sent to your selected provider; configure its key/model in Account. Predictions show evidence and confidence. Seasonal reasoning is labelled separately from historical evidence. Cash snapshot totals may include savings and are not added to spending money.
+Budget centres on a single D3 chart and a projected month-end balance. **Update with AI** generates three approaches from the current month and six prior months using your selected provider. Switching **Save more / Balanced / More flexibility** animates the limits and shows a short AI analysis below the projected balance without another AI call. All three paragraphs are generated with the assessment and reflect the evidence available at that update. Click a category for its largest recorded merchants, AI reasoning and reserved bills. Bars share one scale; spending beyond a limit is highlighted. Refunds contribute to the headline balance rather than reducing gross spending bars.
 
-The three approaches are generated together; switching between them makes no further AI call. You can edit category limits, correct expected payments, or add known income/bills. **Update plan** regenerates all approaches and explains changed category limits. **Refresh actual spending** reads the latest Janus import without moving targets; importing the workbook itself remains in Account. Newly recorded income consumes the original outstanding income forecast, and expected bills remain reserved even if an edited limit is too low. Category bars show gross spending; refunds/credits contribute to overall savings.
+Actuals refresh when you return to the tab; targets stay fixed until reassessment. Expected bills remain reserved until reassessment, and received forecast income is never counted twice. Existing savings are not added as spending money. Notes, cushion inputs, manual editors, forecast comparison markers and the previous-plan comparison have been removed.
 
-Plans are session-only and clear on refresh/sign-out. The local demo is explicitly illustrative and does not call AI. Deploy the Janus Budget endpoints before this frontend.
+Plans are session-only and clear on refresh/sign-out. The local demo is illustrative and does not call AI. Deploy this frontend before the simplified Janus Budget API, which accepts an empty assessment request. The new frontend also works with the preceding API.
 
 ## Tab session state
 
@@ -86,3 +86,7 @@ npm run build   # vite build + bundle verification
 ```
 
 For local development, point `VITE_JANUS_API_URL` at a Janus instance and provide that instance with working Firestore/KMS credentials.
+
+## Frontend code layout
+
+`context/TabSessionContext.jsx` owns account-scoped tab state, pending-request cleanup and scroll restoration. The Ask and Budget request flows live in `hooks/useAskConversation.js` and `hooks/useBudgetPlan.js`. API modules in `services/` handle transport; reusable money formatting and file downloads live in `lib/finance.js` and `lib/download.js`. Page and chart styles live beside their components; `styles.css` contains the shared theme and controls.

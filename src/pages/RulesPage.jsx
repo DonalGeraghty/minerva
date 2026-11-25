@@ -2,10 +2,11 @@ import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
+import { downloadText } from '../lib/download.js'
 import './RulesPage.css'
 import {
   RULE_ACTIONS, RULE_FIELDS, RULE_OPERATORS, RULE_SCOPES, RULE_STATUSES, RULE_TYPES,
-  commitRulesImport, createFinanceRule, deleteFinanceRule, downloadText, exportRulesCsv,
+  commitRulesImport, createFinanceRule, deleteFinanceRule, exportRulesCsv,
   exportRulesJson, listFinanceRules, listRuleHistory, previewRulesImport, restoreRuleVersion,
   updateFinanceRule,
 } from '../services/financeRules.js'
