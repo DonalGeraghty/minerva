@@ -1,3 +1,4 @@
+import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
@@ -13,22 +14,23 @@ export default function TransactionsPage() {
   const from = initial.get('start') || ''
   const to = initial.get('end') || ''
   const validRange = /^\d{4}-(0[1-9]|1[0-2])$/.test(from) && /^\d{4}-(0[1-9]|1[0-2])$/.test(to) && from <= to
-  const [period, setPeriod] = useState(validRange ? 'custom' : 'all')
-  const [start, setStart] = useState(validRange ? from : '')
-  const [end, setEnd] = useState(validRange ? to : '')
-  const [month, setMonth] = useState('')
-  const [type, setType] = useState('')
-  const [category, setCategory] = useState((initial.get('category') || '').slice(0, 500))
-  const [merchant, setMerchant] = useState('')
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState('date')
-  const [order, setOrder] = useState('desc')
-  const [offset, setOffset] = useState(0)
+  const [period, setPeriod] = useTabState(`ledger${location.search}.period`, validRange ? 'custom' : 'all')
+  const [start, setStart] = useTabState(`ledger${location.search}.start`, validRange ? from : '')
+  const [end, setEnd] = useTabState(`ledger${location.search}.end`, validRange ? to : '')
+  const [month, setMonth] = useTabState(`ledger${location.search}.month`, '')
+  const [type, setType] = useTabState(`ledger${location.search}.type`, '')
+  const [category, setCategory] = useTabState(`ledger${location.search}.category`, (initial.get('category') || '').slice(0, 500))
+  const [merchant, setMerchant] = useTabState(`ledger${location.search}.merchant`, '')
+  const [search, setSearch] = useTabState(`ledger${location.search}.search`, '')
+  const [sort, setSort] = useTabState(`ledger${location.search}.sort`, 'date')
+  const [order, setOrder] = useTabState(`ledger${location.search}.order`, 'desc')
+  const [offset, setOffset] = useTabState(`ledger${location.search}.offset`, 0)
   const limit = 50
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  useTabScroll(`ledger${location.search}`, !loading)
   const load = useCallback(async (signal) => {
     setLoading(true)
     setError('')
@@ -91,7 +93,7 @@ export default function TransactionsPage() {
         {error && <p className="settings-message is-error" role="alert">{error}</p>}
         {loading ? <p role="status">Loading transactions…</p> : !error && data && (
           <>
-            <div className="finance-table-scroll" role="region" aria-label="Ledger transactions, scroll horizontally for more columns" tabIndex={0}><table className="finance-table">
+            <div className="finance-table-scroll" data-tab-scroll="ledger" role="region" aria-label="Ledger transactions, scroll horizontally for more columns" tabIndex={0}><table className="finance-table">
               <caption>{data.total} matching rows · snapshot {data.meta.snapshot_id?.slice(0, 8)}… · rule set v{data.meta.rule_set_version}</caption>
               <thead>
                 <tr><th>Date</th><th>ID</th><th>Description</th><th>Merchant</th><th>Category</th><th>Original amount</th><th>Budget amount</th><th>Type</th><th>Rule</th></tr>
