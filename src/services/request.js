@@ -8,6 +8,7 @@ export class ApiError extends Error {
     this.code = code
     this.provider = metadata.provider
     this.retryAfter = metadata.retry_after || 0
+    this.validationReason = metadata.validation_reason || ''
   }
 }
 

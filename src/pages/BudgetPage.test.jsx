@@ -6,6 +6,7 @@ import BudgetPage from './BudgetPage.jsx'
 import { TabSessionProvider } from '../context/TabSessionContext.jsx'
 import { createBudgetPlan, getBudgetContext } from '../services/finance.js'
 import { budgetContext, budgetMeta, budgetResult } from '../test/budgetFixture.js'
+import { ApiError } from '../services/request.js'
 
 vi.mock('../services/finance.js', async (original) => ({ ...await original(), getBudgetContext: vi.fn(), createBudgetPlan: vi.fn() }))
 beforeEach(() => {
@@ -92,6 +93,18 @@ it('requires an import before reassessing stale data', async () => {
   open()
   expect(await screen.findByRole('button', { name: 'Plan the rest of this month' })).toBeDisabled()
   expect(createBudgetPlan).not.toHaveBeenCalled()
+})
+
+it('explains a failed proposal without incorrectly directing the user to Account', async () => {
+  createBudgetPlan.mockRejectedValue(new ApiError('The proposal still needs correction.', 422, 'budget_invalid_proposal', { validation_reason: 'An expected bill was not covered.' }))
+  const user = userEvent.setup()
+  open()
+  await user.click(await screen.findByRole('button', { name: 'Plan the rest of this month' }))
+  const alert = await screen.findByRole('alert')
+  expect(alert).toHaveTextContent('The proposal still needs correction.')
+  expect(within(alert).queryByRole('link', { name: /Check Account/ })).not.toBeInTheDocument()
+  await user.click(screen.getByText('What prevented this plan'))
+  expect(screen.getByText('An expected bill was not covered.')).toBeVisible()
 })
 
 it('cancels a pending assessment when the account session closes', async () => {
