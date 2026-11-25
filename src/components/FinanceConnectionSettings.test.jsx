@@ -13,6 +13,7 @@ vi.mock('../services/financeConnection.js', () => ({ getFinanceConnection: vi.fn
 vi.mock('../services/finance.js', () => ({ getSyncStatus: vi.fn(), syncNow: vi.fn() }))
 
 const WORKBOOK = 'synthetic-finance-workbook'
+const SETUP = { service_account_email: 'reader@synthetic-project.iam.gserviceaccount.com', service_account_ready: true, approved_workbook_id: WORKBOOK }
 const SYNC = { snapshot_id: 'synthetic-snapshot', row_count: 48, fetched_at: '2026-11-24T12:00:00Z', last_success_at: '2026-11-24T12:00:00Z', coverage: { first_month: '2026-06', last_month: '2026-11' } }
 function renderSettings() { return render(<MemoryRouter><FinanceConnectionSettings /></MemoryRouter>) }
 
@@ -20,9 +21,9 @@ describe('Finance connection settings', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     auth.user = { accountId: 'account-one' }
-    getFinanceConnection.mockResolvedValue({ connection: { connected: false } })
-    saveFinanceConnection.mockResolvedValue({ connection: { connected: true, workbook_id: WORKBOOK, last_four: 'cdef' } })
-    deleteFinanceConnection.mockResolvedValue({ connection: { connected: false, workbook_id: WORKBOOK } })
+    getFinanceConnection.mockResolvedValue({ connection: { ...SETUP, connected: false } })
+    saveFinanceConnection.mockResolvedValue({ connection: { ...SETUP, connected: true, mode: 'service_account', workbook_id: WORKBOOK } })
+    deleteFinanceConnection.mockResolvedValue({ connection: { ...SETUP, connected: false, workbook_id: WORKBOOK } })
     getSyncStatus.mockResolvedValue({ sync: SYNC })
     syncNow.mockResolvedValue({ sync: SYNC })
   })
@@ -30,15 +31,17 @@ describe('Finance connection settings', () => {
 
   it('keeps the existing connection after a failed replacement and permits disconnect', async () => {
     const user = userEvent.setup()
-    getFinanceConnection.mockResolvedValue({ connection: { connected: true, workbook_id: WORKBOOK, last_four: 'old4' } })
-    saveFinanceConnection.mockRejectedValue(new ApiError('Secure credential storage is unavailable.', 503, 'credential_service_unavailable'))
+    getFinanceConnection.mockResolvedValue({ connection: { ...SETUP, connected: true, mode: 'access_token', workbook_id: WORKBOOK } })
+    saveFinanceConnection.mockRejectedValue(new ApiError('Share the workbook with the reader as Viewer.', 403, 'workbook_not_shared'))
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderSettings()
-    await screen.findByText('old4')
-    await user.type(screen.getByLabelText('Google OAuth access token (read-only)'), 'bad-token-value-123')
-    await user.click(screen.getByRole('button', { name: 'Replace token' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Secure credential storage is unavailable.')
-    expect(screen.getByText('old4')).toBeInTheDocument()
+    await screen.findByText(/Your existing token connection is still active/)
+    expect(screen.getByLabelText('Share with this reader')).toHaveValue(SETUP.service_account_email)
+    await user.click(screen.getByRole('button', { name: 'Copy reader email' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('Reader address copied')
+    await user.click(screen.getByRole('button', { name: 'Connect and import' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Share the workbook with the reader as Viewer.')
+    expect(screen.getByText(/Your existing token connection is still active/)).toBeInTheDocument()
     expect(auth.logout).not.toHaveBeenCalled()
     await user.click(screen.getByRole('button', { name: 'Disconnect' }))
     expect(await screen.findByText('Not connected')).toBeInTheDocument()
@@ -51,10 +54,12 @@ describe('Finance connection settings', () => {
     syncNow.mockImplementationOnce(() => new Promise((resolve, reject) => { rejectImport = reject }))
     renderSettings()
     await screen.findByText('Not connected')
-    await user.type(screen.getByLabelText('Google OAuth access token (read-only)'), 'ya29.synthetic-token-abcdef')
-    await user.type(screen.getByLabelText('Finance workbook ID'), WORKBOOK)
-    await user.click(screen.getByRole('button', { name: 'Connect workbook' }))
-    expect(screen.getByLabelText('Google OAuth access token (read-only)')).toHaveValue('')
+    const link = `https://docs.google.com/spreadsheets/d/${WORKBOOK}/edit`
+    await user.clear(screen.getByLabelText('Spreadsheet link or ID'))
+    await user.type(screen.getByLabelText('Spreadsheet link or ID'), link)
+    await user.click(screen.getByRole('button', { name: 'Connect and import' }))
+    expect(screen.queryByLabelText('Google OAuth access token (read-only)')).not.toBeInTheDocument()
+    expect(saveFinanceConnection).toHaveBeenCalledWith(link, expect.any(AbortSignal))
     expect(screen.getByRole('status')).toHaveTextContent('Importing transactions')
     expect(screen.queryByText(/Import complete:/)).not.toBeInTheDocument()
     rejectImport(new ApiError('Workbook unavailable.', 404, 'workbook_not_found'))

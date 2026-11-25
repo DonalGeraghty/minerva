@@ -6,10 +6,10 @@ export function getFinanceConnection(signal) {
   return apiRequest('/api/finance/connection', { signal })
 }
 
-export function saveFinanceConnection(accessToken, workbookId, signal) {
+export function saveFinanceConnection(workbookId, signal) {
   return apiRequest('/api/finance/connection', {
     method: 'PUT', headers: JSON_HEADERS, signal,
-    body: JSON.stringify({ access_token: accessToken, workbook_id: workbookId }),
+    body: JSON.stringify({ mode: 'service_account', workbook_id: workbookId }),
   })
 }
 
