@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import Brand from '../components/Brand.jsx'
 import PeriodPicker from '../components/PeriodPicker.jsx'
-import { eur, getTransactions, monthLabel } from '../services/finance.js'
+import { getTransactions } from '../services/finance.js'
+import { eur, monthLabel } from '../lib/finance.js'
 
 const TYPES = ['Income', 'Expense', 'Refund', 'Transfer']
 

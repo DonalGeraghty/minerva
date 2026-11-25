@@ -58,6 +58,8 @@ Production builds exclude the demo credentials.
 
 ## Development
 
+Source organisation: `src/pages` contains the tab screens, `src/components` holds reusable UI, `src/services` contains Janus API requests, and `src/lib/finance.js` contains shared currency/month formatting and period choices. Tests live beside the code they exercise.
+
 ```bash
 npm run check   # eslint + vitest
 npm run build   # vite build + bundle verification

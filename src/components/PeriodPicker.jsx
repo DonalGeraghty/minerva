@@ -1,4 +1,4 @@
-import { PERIODS } from '../services/finance.js'
+import { PERIODS } from '../lib/finance.js'
 
 export default function PeriodPicker({ period, setPeriod, start, setStart, end, setEnd }) {
   return (

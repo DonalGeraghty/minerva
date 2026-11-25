@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import PeriodPicker from '../components/PeriodPicker.jsx'
 import CashflowWaterfall from '../components/CashflowWaterfall.jsx'
-import { eur, getCashflow, getSummary, getSyncStatus, monthLabel } from '../services/finance.js'
+import { getCashflow, getSummary, getSyncStatus } from '../services/finance.js'
+import { eur, monthLabel } from '../lib/finance.js'
 import './DashboardPage.css'
 
 export default function DashboardPage() {
@@ -22,7 +23,7 @@ export default function DashboardPage() {
     const load = async () => {
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const [summary, cashflow, status] = await Promise.all([
-          getSummary(period, start, end, controller.signal), getCashflow(period, start, end, 'month', controller.signal), getSyncStatus(controller.signal),
+          getSummary(period, start, end, controller.signal), getCashflow(period, start, end, controller.signal), getSyncStatus(controller.signal),
         ])
         if (controller.signal.aborted) return
         if (summary.meta.snapshot_id === cashflow.meta.snapshot_id && summary.meta.rule_set_version === cashflow.meta.rule_set_version && status.sync.snapshot_id === summary.meta.snapshot_id) {
