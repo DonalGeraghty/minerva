@@ -1,0 +1,44 @@
+.budget-chart { margin: 0 clamp(.5rem, 2vw, 2rem); padding-bottom: 1rem; }
+.budget-chart-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding: .5rem 1rem 1.1rem; color: #bec9b7; font-size: .8rem; }
+.budget-legend { display: flex; gap: 1.25rem; color: #a8b0a1; font-size: .72rem; }
+.budget-legend span { display: inline-flex; align-items: center; gap: .5rem; }
+.budget-legend i { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; background: #98bc9a; }
+.budget-legend .limit-key { width: 2px; height: .85rem; background: #d7c18b; border-radius: 0; }
+.budget-svg { display: block; overflow: visible; }
+.budget-grid line { stroke: #29332a; stroke-dasharray: 2 6; }
+.budget-grid text { fill: #879480; font: 11px 'DM Mono', monospace; }
+.budget-chart-row { cursor: pointer; outline: none; }
+.budget-row-hit { fill: transparent; stroke: transparent; transition: fill 150ms; }
+.budget-chart-row:hover .budget-row-hit, .budget-chart-row.is-selected .budget-row-hit { fill: #8eac7810; }
+.budget-chart-row:focus-visible .budget-row-hit { stroke: #d5c69b; }
+.budget-row-name { fill: #e0e4d6; font-size: 15px; }
+.budget-row-amount { fill: #a9b6a5; font: 12px 'DM Mono', monospace; }
+.budget-row-track { fill: #1d281f; }
+.budget-row-allowance { fill: #66815a36; }
+.budget-row-spent { fill: #98bc9a; }
+.budget-row-spent, .budget-row-allowance { transition: width 550ms cubic-bezier(.22,.8,.25,1); }
+.budget-row-limit { transition: transform 550ms cubic-bezier(.22,.8,.25,1); }
+.budget-row-limit line { stroke: #d7c18b; stroke-width: 2; }
+.budget-row-limit circle { fill: #d7c18b; }
+.budget-row-left { fill: #c8cfb4; font: 11px 'DM Mono', monospace; }
+.is-over .budget-row-spent { fill: #d79b8f; }
+.is-over .budget-row-left { fill: #e0a494; }
+.budget-chart-hint { margin: 1.25rem 1rem .5rem; text-align: center; color: #84917e; font-size: .7rem; }
+.budget-detail { margin: 0 .5rem 1.5rem; padding: clamp(1rem, 2vw, 2rem); background: #1a251c; border: 1px solid #4a6044; border-radius: 1rem; outline: none; }
+.budget-detail-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.budget-detail h3 { margin: 0; color: #e3e9d9; font-size: 1.4rem; font-weight: 500; }
+.budget-detail-heading button { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid #52654b; background: transparent; color: #dbe3d0; cursor: pointer; font-size: 1.4rem; }
+.budget-detail p { color: #b2c0aa; line-height: 1.8; font-size: .85rem; }
+.budget-detail-amounts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin: 1.25rem 0; color: #a4b59c; font-size: .8rem; }
+.budget-detail-amounts b { margin-left: .5rem; color: #e2e7d5; font-weight: 500; }
+.budget-merchants { max-width: 42rem; }
+.budget-merchants > p { margin-bottom: .3rem; font-size: .7rem; }
+.budget-merchants ul { padding: 0; list-style: none; margin: 0; }
+.budget-merchants li { display: flex; gap: 1rem; justify-content: space-between; border-bottom: 1px solid #354532; padding: .6rem 0; font-size: .8rem; color: #d3ddca; }
+.budget-merchants li span { overflow-wrap: anywhere; }
+.budget-merchants b { font-weight: 400; white-space: nowrap; }
+.budget-detail p.budget-detail-evidence { font-size: .72rem; color: #9fb195; }
+.budget-empty { margin: .5rem clamp(1.2rem, 2.5vw, 2.5rem) 1.5rem; color: #b4bca8; font-size: .8rem; line-height: 1.8; }
+@media (min-width: 120rem) { .budget-chart { margin-inline: 3rem; } }
+@media (max-width: 40rem) { .budget-row-name { font-size: 13px; } .budget-row-amount { font-size: 10px; } .budget-chart-heading { font-size: .72rem; } }
+@media (prefers-reduced-motion: reduce) { .budget-row-spent, .budget-row-allowance, .budget-row-limit { transition: none; } }

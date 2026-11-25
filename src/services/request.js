@@ -6,8 +6,6 @@ export class ApiError extends Error {
     this.name = 'ApiError'
     this.status = status
     this.code = code
-    this.provider = metadata.provider
-    this.retryAfter = metadata.retry_after || 0
     this.validationReason = metadata.validation_reason || ''
   }
 }

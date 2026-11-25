@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
-import { useAskConversation, useTabScroll } from '../context/TabSessionContext.jsx'
+import { useTabScroll } from '../context/TabSessionContext.jsx'
+import { useAskConversation } from '../hooks/useAskConversation.js'
+import './AskPage.css'
 
 export default function AskPage() {
   const { messages, input, busy, error, errorCode, meta, setInput, ask, newConversation } = useAskConversation()

@@ -174,30 +174,18 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .finance-filters { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem; margin-bottom: 1rem; }
 .finance-filters label { display: grid; gap: .35rem; color: var(--muted); font-size: .72rem; }
 .is-negative { color: #ff9d9d; }
-.finance-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .75rem; color: var(--soft); margin-top: 1rem; }
+.finance-table { width: 100%; min-width: 62rem; border-collapse: collapse; text-align: left; font-size: .75rem; color: var(--soft); margin-top: 1rem; line-height: 1.6; }
 .finance-table caption { text-align: left; margin-bottom: .6rem; color: var(--muted); }
 .finance-table th, .finance-table td { padding: .55rem .6rem; border-bottom: 1px solid var(--line); font-weight: 400; }
 .finance-table tr.is-excluded td { opacity: .5; }
 .finance-pager { margin-top: 1rem; justify-content: space-between; }
 .finance-pager span { color: var(--muted); font-size: .72rem; }
-.finance-empty { color: var(--muted); font-size: .8rem; }
-.finance-meta { color: var(--muted); font-size: .68rem; font-family: 'DM Mono', monospace; margin-top: .8rem; }
-.chat-log { display: flex; flex-direction: column; gap: .7rem; max-height: 24rem; overflow-y: auto; padding: 1rem .2rem; }
-.chat-bubble { max-width: 85%; padding: .6rem .8rem; border: 1px solid var(--line); border-radius: .7rem; font-size: .8rem; line-height: 1.55; }
-.chat-bubble strong { display: block; margin-bottom: .2rem; font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-.chat-bubble p { margin: 0; white-space: pre-wrap; word-break: break-word; }
-.chat-bubble.is-user { align-self: flex-end; border-color: #514a37; background: #17140e; }
-.chat-bubble.is-assistant { align-self: flex-start; background: var(--surface); }
-.chat-form { display: flex; gap: .6rem; margin-top: 1rem; }
-.chat-form input { flex: 1; min-width: 0; min-height: 2.8rem; padding: .7rem .9rem; border: 1px solid #2d2b25; border-radius: .55rem; color: var(--text); background: #12110d; font-size: .8rem; }
-.chat-form input:focus-visible { outline: 1px solid var(--gold); border-color: var(--gold); }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-@media (max-width: 46rem) { .dock { grid-template-columns: repeat(7, minmax(0, 1fr)); width: calc(100% - 1rem); } .dock-label { font-size: .52rem; } }
+@media (max-width: 46rem) { .dock-label { font-size: .52rem; } }
 
 /* Data views use desktop width; reading and account forms stay comfortably bounded. */
 .finance-page:not(.ask-page), .rules-page { width: min(calc(100% - clamp(2rem, 5vw, 10rem)), 220rem); }
 .finance-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
-.finance-table { min-width: 62rem; line-height: 1.6; }
 .finance-table td { overflow-wrap: anywhere; max-width: 26rem; }
 .finance-table th { white-space: nowrap; }
 .finance-filters > label { min-width: 0; }
@@ -214,11 +202,10 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
   .finance-page:not(.ask-page), .rules-page { width: calc(100% - 1rem); }
   .finance-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .finance-filters .period-picker { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
-  .finance-filters input, .finance-filters select, .chat-form input { width: 100%; min-width: 0; min-height: 2.75rem; font-size: 1rem; }
+  .finance-filters input, .finance-filters select { width: 100%; min-width: 0; min-height: 2.75rem; font-size: 1rem; }
   .finance-pager { display: flex; flex-wrap: wrap; gap: .75rem; }
   .page { padding-bottom: calc(8rem + env(safe-area-inset-bottom)); }
 }
 
-.chat-answer-meta { display: block; margin-top: .7rem; color: var(--muted); font-size: .65rem; overflow-wrap: anywhere; }
 
 @media (max-width: 24rem) { .dock-label { font-size: .47rem; } .dock { padding-inline: .2rem; gap: 0; } }

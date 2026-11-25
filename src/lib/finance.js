@@ -28,6 +28,11 @@ export function eur(value) {
   return Number.isFinite(amount) ? euroFormatter.format(amount) : 'Unavailable'
 }
 
+export function eurCents(cents) {
+  if (!Number.isSafeInteger(cents)) throw new Error('This amount is outside the supported range.')
+  return eur((cents / 100).toFixed(2))
+}
+
 export function monthLabel(month) {
   if (!month || !/^\d{4}-\d{2}$/.test(month)) return month || '—'
   const [year, mon] = month.split('-').map(Number)

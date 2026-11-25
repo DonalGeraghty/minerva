@@ -1,17 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useState, useSyncExternalStore } from 'react'
-import { createBudgetPlan, financeChat } from '../services/finance.js'
 
 const TabSessionContext = createContext(null)
-const EMPTY_CHAT = { messages: [], input: '', busy: false, error: '', errorCode: '', meta: null }
-const EMPTY_BUDGET = { result: null, previous: null, busy: false, error: '', errorCode: '', validationReason: '' }
 
 function createSession() {
   const values = new Map()
   const listeners = new Set()
   return {
     active: true,
-    request: null,
-    budgetRequest: null,
+    requests: {},
     positions: new Map(),
     activate() { this.active = true },
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener) },
@@ -24,10 +20,8 @@ function createSession() {
     },
     dispose() {
       this.active = false
-      this.request?.abort()
-      this.budgetRequest?.abort()
-      this.request = null
-      this.budgetRequest = null
+      Object.values(this.requests).forEach((controller) => controller?.abort())
+      this.requests = {}
       values.clear()
       this.positions.clear()
     },
@@ -43,7 +37,7 @@ export function TabSessionProvider({ children }) {
   return <TabSessionContext.Provider value={session}>{children}</TabSessionContext.Provider>
 }
 
-function useSession() {
+export function useTabSession() {
   const provided = useContext(TabSessionContext)
   const [local] = useState(() => provided ? null : createSession())
   useEffect(() => {
@@ -54,7 +48,7 @@ function useSession() {
   return provided || local
 }
 
-function useStoredState(session, key, initial) {
+export function useStoredState(session, key, initial) {
   const getSnapshot = useCallback(() => session.get(key, initial), [session, key, initial])
   const value = useSyncExternalStore(session.subscribe, getSnapshot)
   const setValue = useCallback((next) => session.set(key, next, initial), [session, key, initial])
@@ -62,75 +56,13 @@ function useStoredState(session, key, initial) {
 }
 
 export function useTabState(key, initial) {
-  return useStoredState(useSession(), key, initial)
-}
-
-export function useAskConversation() {
-  const session = useSession()
-  const [chat, setChat] = useStoredState(session, 'ask', EMPTY_CHAT)
-  const setInput = (input) => setChat((current) => ({ ...current, input }))
-  const newConversation = () => {
-    session.request?.abort()
-    session.request = null
-    setChat({ ...EMPTY_CHAT })
-    session.positions.delete('ask')
-  }
-  const ask = async (event) => {
-    event.preventDefault()
-    const current = session.get('ask', EMPTY_CHAT)
-    const question = current.input.trim()
-    if (!question || current.busy) return
-    const controller = new AbortController()
-    session.request = controller
-    const messages = [...current.messages, { role: 'user', content: question }]
-    setChat({ ...current, messages, input: '', busy: true, error: '', errorCode: '' })
-    try {
-      const history = current.messages.map(({ role, content }) => ({ role, content }))
-      const result = await financeChat(question, history, controller.signal)
-      if (!controller.signal.aborted && session.request === controller) {
-        setChat((state) => ({ ...state, messages: [...messages, { role: 'assistant', content: result.answer, meta: result.meta }], meta: result.meta }))
-      }
-    } catch (error) {
-      if (!controller.signal.aborted && session.request === controller) {
-        setChat((state) => ({ ...state, error: error.message || 'Could not get an answer', errorCode: error.code || '' }))
-      }
-    } finally {
-      if (session.request === controller) {
-        session.request = null
-        setChat((state) => ({ ...state, busy: false }))
-      }
-    }
-  }
-  return { ...chat, setInput, ask, newConversation }
-}
-
-export function useBudgetPlan(month) {
-  const session = useSession()
-  const stateKey = `budget.plan.${month}`
-  const [state, setState] = useStoredState(session, stateKey, EMPTY_BUDGET)
-  const generate = async (body) => {
-    if (session.get(stateKey, EMPTY_BUDGET).busy) return
-    session.budgetRequest?.abort()
-    const controller = new AbortController()
-    session.budgetRequest = controller
-    setState((current) => ({ ...current, busy: true, error: '', errorCode: '', validationReason: '' }))
-    try {
-      const result = await createBudgetPlan(body, controller.signal)
-      if (!controller.signal.aborted && session.active) setState((current) => ({ ...current, previous: current.result, result }))
-    } catch (error) {
-      if (!controller.signal.aborted && session.active) setState((current) => ({ ...current, error: error.message || 'Could not assess your budget.', errorCode: error.code || '', validationReason: error.validationReason || '' }))
-    } finally {
-      if (session.budgetRequest === controller) session.budgetRequest = null
-      if (session.active) setState((current) => ({ ...current, busy: false }))
-    }
-  }
-  return { ...state, generate }
+  return useStoredState(useTabSession(), key, initial)
 }
 
 // Restore after asynchronous page content has arrived, rather than clamping a
 // saved position against a short loading screen. Named inner scrollers are saved too.
 export function useTabScroll(key, ready = true) {
-  const session = useSession()
+  const session = useTabSession()
   useLayoutEffect(() => {
     if (!ready) return
     const saved = session.positions.get(key)
