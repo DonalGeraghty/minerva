@@ -6,6 +6,7 @@ import { TabSessionProvider } from './context/TabSessionContext.jsx'
 import AccountPage from './pages/AccountPage.jsx'
 import AskPage from './pages/AskPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
+import BudgetPage from './pages/BudgetPage.jsx'
 import LoginSplash from './pages/LoginSplash.jsx'
 import RulesPage from './pages/RulesPage.jsx'
 import TransactionsPage from './pages/TransactionsPage.jsx'
@@ -25,6 +26,7 @@ export default function App() {
       <Routes>
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/budget" element={<BudgetPage />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/rules" element={<RulesPage />} />
           <Route path="/ask" element={<AskPage />} />

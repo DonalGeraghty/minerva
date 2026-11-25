@@ -5,6 +5,7 @@ import App from './App.jsx'
 
 const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one' }, logout: vi.fn() } }))
 vi.mock('./context/AuthContext.jsx', () => ({ useAuth: () => auth }))
+vi.mock('./pages/BudgetPage.jsx', () => ({ default: () => <div>Budget page</div> }))
 vi.mock('./pages/DashboardPage.jsx', () => ({ default: () => <div>Dashboard page</div> }))
 vi.mock('./pages/TransactionsPage.jsx', () => ({ default: () => <div>Ledger page</div> }))
 vi.mock('./pages/RulesPage.jsx', () => ({ default: () => <div>Rules page</div> }))
@@ -22,11 +23,11 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('Minerva navigation', () => {
-  it('shows all six dock links and opens each section directly', async () => {
+  it('shows all seven dock links and opens each section directly', async () => {
     const user = userEvent.setup()
     open('/')
-    expect(navigation().getAllByRole('link')).toHaveLength(6)
-    for (const [label, text] of [['Ledger', 'Ledger page'], ['Rules', 'Rules page'], ['Ask', 'Ask page'], ['Account', 'Account settings'], ['Instructions', 'Instructions guide']]) {
+    expect(navigation().getAllByRole('link')).toHaveLength(7)
+    for (const [label, text] of [['Budget', 'Budget page'], ['Ledger', 'Ledger page'], ['Rules', 'Rules page'], ['Ask', 'Ask page'], ['Account', 'Account settings'], ['Instructions', 'Instructions guide']]) {
       await user.click(navigation().getByRole('link', { name: label }))
       expect(await screen.findByText(text)).toBeInTheDocument()
       expect(navigation().getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page')
