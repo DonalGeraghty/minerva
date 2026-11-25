@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import DashboardPage from './DashboardPage.jsx'
 import * as finance from '../services/finance.js'
 
-vi.mock('../services/finance.js', async (original) => ({ ...await original(), getSyncStatus: vi.fn(), getSummary: vi.fn(), getCashflow: vi.fn(), getCategoryCashflow: vi.fn() }))
+vi.mock('../services/finance.js', async (original) => ({ ...await original(), getSyncStatus: vi.fn(), getSummary: vi.fn(), getCashflow: vi.fn() }))
 const META = { snapshot_id: 'synthetic-snapshot', rule_set_version: 3, source: 'local_demo', coverage: { first_month: '2026-10', last_month: '2026-11', months: ['2026-10', '2026-11'] }, warnings: [] }
 const SUMMARY = { meta: META, summary: { adjusted_totals: { net: '2017.66' }, period: { start: '2026-10', end: '2026-11' }, gaps: [], receipt_conflicts: [], provisional: false } }
 const FLOW = { meta: META, cashflow: [{ month: '2026-10', net: '-950.00' }, { month: '2026-11', net: '2967.66' }] }
@@ -18,7 +18,6 @@ describe('Dashboard waterfall', () => {
     finance.getSyncStatus.mockResolvedValue(STATUS)
     finance.getSummary.mockResolvedValue(SUMMARY)
     finance.getCashflow.mockResolvedValue(FLOW)
-    finance.getCategoryCashflow.mockResolvedValue({ meta: META, cashflow: [] })
   })
   afterEach(cleanup)
 
@@ -47,7 +46,7 @@ describe('Dashboard waterfall', () => {
   })
 
   it('rejects mixed snapshot or rule versions after one retry', async () => {
-    finance.getCategoryCashflow.mockResolvedValue({ meta: { ...META, rule_set_version: 4 }, cashflow: [] })
+    finance.getCashflow.mockResolvedValue({ ...FLOW, meta: { ...META, rule_set_version: 4 } })
     renderPage()
     expect(await screen.findByRole('alert')).toHaveTextContent('data changed while loading')
     expect(finance.getCashflow).toHaveBeenCalledTimes(2)
@@ -62,10 +61,4 @@ describe('Dashboard waterfall', () => {
     expect(screen.queryByText('€0.00')).not.toBeInTheDocument()
   })
 
-  it('keeps the waterfall available when the category service fails', async () => {
-    finance.getCategoryCashflow.mockRejectedValue(new Error('Category breakdown unavailable.'))
-    renderPage()
-    expect(await screen.findByRole('img', { name: 'Monthly net cash flow waterfall' })).toBeInTheDocument()
-    expect(screen.getByText('Category breakdown unavailable.')).toBeInTheDocument()
-  })
 })
