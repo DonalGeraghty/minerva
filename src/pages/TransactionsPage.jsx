@@ -91,7 +91,7 @@ export default function TransactionsPage() {
         {error && <p className="settings-message is-error" role="alert">{error}</p>}
         {loading ? <p role="status">Loading transactions…</p> : !error && data && (
           <>
-            <table className="finance-table">
+            <div className="finance-table-scroll" role="region" aria-label="Ledger transactions, scroll horizontally for more columns" tabIndex={0}><table className="finance-table">
               <caption>{data.total} matching rows · snapshot {data.meta.snapshot_id?.slice(0, 8)}… · rule set v{data.meta.rule_set_version}</caption>
               <thead>
                 <tr><th>Date</th><th>ID</th><th>Description</th><th>Merchant</th><th>Category</th><th>Original amount</th><th>Budget amount</th><th>Type</th><th>Rule</th></tr>
@@ -112,7 +112,7 @@ export default function TransactionsPage() {
                 ))}
                 {data.transactions.length === 0 && <tr><td colSpan={9}>No transactions match.</td></tr>}
               </tbody>
-            </table>
+            </table></div>
             <div className="form-actions finance-pager">
               <button className="secondary-button" type="button" disabled={offset === 0 || loading} onClick={() => setOffset(Math.max(0, offset - limit))}>Previous</button>
               <span>Showing {offset + 1}–{Math.min(offset + limit, data.total)} of {data.total}</span>

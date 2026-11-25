@@ -4,7 +4,7 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 
 ## Tabs
 
-- **Dashboard (`/`):** a D3 monthly net waterfall, with a six-month default and selectable presets/custom whole-month ranges. The waterfall builds a running net from zero and shows a gold period total. Select a month to open its Ledger transactions, or select the total to open the full selected period. Columns support mouse, touch, and keyboard navigation. It reconciles in exact cents against Janus monthly totals and rejects mixed snapshot/rule versions. Import controls live in Account; data notes, gaps and stale indicators remain visible.
+- **Dashboard (`/`):** a D3 monthly net waterfall, with a six-month default and selectable presets/custom whole-month ranges. The waterfall builds a running net from zero and shows a gold period total. Select a month to replace the chart with its income, spending categories and refunds, ending at the same monthly net. Back to months restores the original waterfall and date range. Month columns support mouse, touch, and keyboard navigation; category bars and totals are informational. It reconciles in exact cents against Janus monthly totals and rejects mixed snapshot/rule versions. Import controls live in Account; data notes, gaps and stale indicators remain visible.
 - **Ledger (`/transactions`):** filterable, paginated transaction table (month, type, category, merchant, search, sorting) with the rule that interpreted each row and excluded/review flags.
 - **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
 - **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored; each answer shows the privacy note.
@@ -56,6 +56,10 @@ To start the services separately, run `run_demo.py` in Janus, then
 and Minerva to http://127.0.0.1:5173, overriding any production API URL in `.env`.
 Normal `npm run dev` retains the configured API and does not offer the demo button.
 Production builds exclude the demo credentials.
+
+## Responsive layout
+
+Dashboard, Ledger and Rules expand across large desktop windows. Waterfalls measure their container and keep a bounded height with readable labels; on small screens, additional columns scroll horizontally inside the chart. Mobile filters stack, and the Ledger table has its own horizontal scroll area. Account forms and reading pages keep a comfortable line length.
 
 ## Development
 

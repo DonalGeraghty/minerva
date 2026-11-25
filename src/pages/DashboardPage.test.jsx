@@ -42,7 +42,7 @@ describe('Dashboard waterfall', () => {
     renderPage()
     expect(await screen.findByText(/Showing saved data/)).toBeInTheDocument()
     expect(screen.getByText(/These are gaps, not zero activity/)).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /^Sep 2026:/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Sep 2026:/ })).not.toBeInTheDocument()
   })
 
   it('rejects mixed snapshot or rule versions after one retry', async () => {
