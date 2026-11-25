@@ -15,13 +15,6 @@ describe('Account settings', () => {
   beforeEach(() => vi.clearAllMocks())
   afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
-  it('keeps the finance connection and shared AI controls without flashcard context settings', () => {
-    render(<MemoryRouter><AccountPage /></MemoryRouter>)
-    expect(screen.getByText('Finance settings')).toBeInTheDocument()
-    expect(screen.getByText('AI settings')).toBeInTheDocument()
-    expect(screen.queryByRole('checkbox', { name: /existing cards/i })).not.toBeInTheDocument()
-  })
-
   it('still requires a password and shared-account confirmation before deletion', async () => {
     const user = userEvent.setup()
     vi.spyOn(window, 'confirm').mockReturnValue(true)

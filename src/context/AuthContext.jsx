@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import {
   API_BASE_URL,
   API_ENDPOINTS,
@@ -6,48 +6,63 @@ import {
   getStoredToken,
   setStoredToken,
 } from '../config/api.js'
-import { DEMO_EMAIL, DEMO_PASSWORD, DEMO_TOKEN, DEMO_USER } from '../services/demoAccount.js'
+import { DEMO_EMAIL, DEMO_PASSWORD } from '../services/demoAccount.js'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [sessionError, setSessionError] = useState('')
+  const restoreRequest = useRef(null)
 
   const logout = useCallback(() => {
+    restoreRequest.current?.abort()
     setStoredToken('')
     setUser(null)
+    setLoading(false)
+    setSessionError('')
   }, [])
 
   const restoreSession = useCallback(async () => {
+    restoreRequest.current?.abort()
+    const controller = new AbortController()
+    restoreRequest.current = controller
     const storedToken = getStoredToken()
-    if (import.meta.env.DEV && storedToken === DEMO_TOKEN) {
-      setUser(DEMO_USER)
-      setLoading(false)
-      return
-    }
+    setLoading(true)
+    setSessionError('')
     if (!storedToken) {
+      setUser(null)
       setLoading(false)
       return
     }
     try {
-      const response = await authFetch(API_ENDPOINTS.AUTH_ME, { method: 'GET' })
+      const response = await authFetch(API_ENDPOINTS.AUTH_ME, { method: 'GET', signal: controller.signal })
       const data = await response.json().catch(() => ({}))
-      if (!response.ok || !data.user?.account_id) {
+      if (controller.signal.aborted || getStoredToken() !== storedToken) return
+      if (response.status === 401 || response.status === 403) {
         logout()
         return
       }
-      setUser({ email: data.user.email, accountId: data.user.account_id })
+      if (!response.ok || !data.user?.account_id) throw new Error('Session restoration unavailable')
+      setUser({ email: data.user.email, accountId: data.user.account_id, isDemo: data.user.is_demo === true })
     } catch {
-      // Keep the stored session so a reload can retry when connectivity returns.
+      if (!controller.signal.aborted && getStoredToken() === storedToken) {
+        setUser(null)
+        setSessionError('Could not restore your session. Your saved sign-in has been kept. Try again.')
+      }
     } finally {
-      setLoading(false)
+      if (!controller.signal.aborted) setLoading(false)
     }
   }, [logout])
 
-  useEffect(() => { restoreSession() }, [restoreSession])
+  useEffect(() => {
+    restoreSession()
+    return () => restoreRequest.current?.abort()
+  }, [restoreSession])
 
   const authenticate = useCallback(async (endpoint, email, password) => {
+    restoreRequest.current?.abort()
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,21 +72,20 @@ export function AuthProvider({ children }) {
     if (!response.ok) throw new Error(data.message || data.error || 'Authentication failed')
     if (!data.token || !data.user?.account_id) throw new Error('The account response was incomplete')
     setStoredToken(data.token)
-    const nextUser = { email: data.user.email || email, accountId: data.user.account_id }
+    const nextUser = { email: data.user.email || email, accountId: data.user.account_id, isDemo: data.user.is_demo === true }
     setUser(nextUser)
+    setSessionError('')
+    setLoading(false)
     return nextUser
   }, [])
 
   const loginAsDemo = useCallback(() => {
-    if (!import.meta.env.DEV) throw new Error('The demo account is available only in local development.')
-    setStoredToken(DEMO_TOKEN)
-    setUser(DEMO_USER)
-    return DEMO_USER
-  }, [])
+    if (!import.meta.env.DEV || import.meta.env.VITE_LOCAL_DEMO !== 'true') throw new Error('Start npm run dev:demo to use the local demo account.')
+    return authenticate(API_ENDPOINTS.AUTH_LOGIN, DEMO_EMAIL, DEMO_PASSWORD)
+  }, [authenticate])
   const login = useCallback((email, password) => {
-    if (import.meta.env.DEV && email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD) return loginAsDemo()
     return authenticate(API_ENDPOINTS.AUTH_LOGIN, email, password)
-  }, [authenticate, loginAsDemo])
+  }, [authenticate])
   const register = useCallback(
     (email, password) => authenticate(API_ENDPOINTS.AUTH_REGISTER, email, password),
     [authenticate],
@@ -92,12 +106,14 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     user,
     loading,
+    sessionError,
+    retrySession: restoreSession,
     login,
     loginAsDemo,
     register,
     logout,
     deleteAccount,
-  }), [user, loading, login, loginAsDemo, register, logout, deleteAccount])
+  }), [user, loading, sessionError, restoreSession, login, loginAsDemo, register, logout, deleteAccount])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

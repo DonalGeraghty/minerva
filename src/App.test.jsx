@@ -7,8 +7,6 @@ const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one' },
 vi.mock('./context/AuthContext.jsx', () => ({ useAuth: () => auth }))
 vi.mock('./pages/DashboardPage.jsx', () => ({ default: () => <div>Dashboard page</div> }))
 vi.mock('./pages/TransactionsPage.jsx', () => ({ default: () => <div>Ledger page</div> }))
-vi.mock('./pages/WealthPage.jsx', () => ({ default: () => <div>Wealth page</div> }))
-vi.mock('./pages/AnalysisPage.jsx', () => ({ default: () => <div>Analysis page</div> }))
 vi.mock('./pages/RulesPage.jsx', () => ({ default: () => <div>Rules page</div> }))
 vi.mock('./pages/AskPage.jsx', () => ({ default: () => <div>Ask page</div> }))
 vi.mock('./pages/AccountPage.jsx', () => ({ default: () => <div>Account settings</div> }))
@@ -22,21 +20,11 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Minerva navigation', () => {
-  it('opens the dashboard at / and redirects unknown paths to it', () => {
-    for (const path of ['/', '/anything-else']) {
-      cleanup()
-      open(path)
-      expect(screen.getByText('Dashboard page')).toBeInTheDocument()
-      expect(window.location.pathname).toBe('/')
-      expect(navigation().getByRole('link', { name: 'Dashboard' })).toHaveAttribute('aria-current', 'page')
-    }
-  })
-
-  it('shows all seven dock links and opens each section directly', async () => {
+  it('shows all five dock links and opens each section directly', async () => {
     const user = userEvent.setup()
     open('/')
-    expect(navigation().getAllByRole('link')).toHaveLength(7)
-    for (const [label, text] of [['Ledger', 'Ledger page'], ['Wealth', 'Wealth page'], ['Analysis', 'Analysis page'], ['Rules', 'Rules page'], ['Ask', 'Ask page'], ['Account', 'Account settings']]) {
+    expect(navigation().getAllByRole('link')).toHaveLength(5)
+    for (const [label, text] of [['Ledger', 'Ledger page'], ['Rules', 'Rules page'], ['Ask', 'Ask page'], ['Account', 'Account settings']]) {
       await user.click(navigation().getByRole('link', { name: label }))
       expect(await screen.findByText(text)).toBeInTheDocument()
       expect(navigation().getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page')

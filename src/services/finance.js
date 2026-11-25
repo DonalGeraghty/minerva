@@ -1,5 +1,7 @@
 import { apiRequest } from './request.js'
 
+const euroFormatter = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' })
+
 export const PERIODS = [
   { id: 'this_month', label: 'This month' },
   { id: 'last_month', label: 'Last month' },
@@ -48,43 +50,17 @@ export function getTransactions({ period, start, end, month, type, category, mer
   return apiRequest(`/api/finance/transactions?${params}`, { signal })
 }
 
-export function getCategories(period, start, end, signal) {
-  return apiRequest(`/api/finance/categories?${periodParams(period, start, end)}`, { signal })
-}
-
-export function getMerchants(period, start, end, signal) {
-  return apiRequest(`/api/finance/merchants?${periodParams(period, start, end)}`, { signal })
-}
-
-export function getTrends(period, start, end, signal) {
-  return apiRequest(`/api/finance/trends?${periodParams(period, start, end)}`, { signal })
-}
-
-export function getNetWorth(signal) {
-  return apiRequest('/api/finance/net-worth', { signal })
-}
-
-export function getSinkingFunds(signal) {
-  return apiRequest('/api/finance/sinking-funds', { signal })
-}
-
-export function getBudgets(signal) {
-  return apiRequest('/api/finance/budgets', { signal })
-}
-
 export function eur(value) {
-  const amount = Number(value ?? 0)
-  return new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(amount)
+  if (typeof value !== 'number' && typeof value !== 'string') return 'Unavailable'
+  if (typeof value === 'string' && !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(value.trim())) return 'Unavailable'
+  const amount = Number(value)
+  return Number.isFinite(amount) ? euroFormatter.format(amount) : 'Unavailable'
 }
 
 export function monthLabel(month) {
   if (!month || !/^\d{4}-\d{2}$/.test(month)) return month || '—'
   const [year, mon] = month.split('-').map(Number)
   return new Date(Date.UTC(year, mon - 1, 1)).toLocaleDateString('en-IE', { month: 'short', year: 'numeric', timeZone: 'UTC' })
-}
-
-export function isMoneyNegative(value) {
-  return Number(value ?? 0) < 0
 }
 
 export function financeChat(message, history, signal) {

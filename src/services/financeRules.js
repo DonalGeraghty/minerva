@@ -52,10 +52,6 @@ export function exportRulesJson(signal) {
   return apiRequest('/api/finance/rules/export?format=json', { signal })
 }
 
-export function testFinanceRules(rows, signal) {
-  return apiRequest('/api/finance/rules/test', { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ rows }), signal })
-}
-
 export function listRuleHistory(signal) {
   return apiRequest('/api/finance/rules/history', { signal })
 }

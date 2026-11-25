@@ -28,9 +28,9 @@ export default function TransactionsPage() {
     try {
       const result = await getTransactions(
         { period, start, end, month, type, category, merchant, search, sort, order, limit, offset }, signal)
-      setData(result)
+      if (!signal.aborted) setData(result)
     } catch (requestError) {
-      if (requestError.name !== 'AbortError') setError(requestError.message || 'Could not load transactions')
+      if (!signal.aborted && requestError.name !== 'AbortError') setError(requestError.message || 'Could not load transactions')
     } finally {
       if (!signal.aborted) setLoading(false)
     }
@@ -42,7 +42,8 @@ export default function TransactionsPage() {
     return () => controller.abort()
   }, [load])
 
-  const filter = (setter) => (event) => { setter(event.target.value); setOffset(0) }
+  const changeFilter = (setter) => (value) => { setter(value); setOffset(0) }
+  const filter = (setter) => (event) => changeFilter(setter)(event.target.value)
   const months = data?.meta?.coverage?.months || []
 
   return (
@@ -55,7 +56,7 @@ export default function TransactionsPage() {
       </section>
       <section className="app-panel" aria-label="Transaction filters">
         <div className="form-actions finance-filters">
-          <PeriodPicker period={period} setPeriod={(v) => { setPeriod(v); setOffset(0) }} start={start} setStart={setStart} end={end} setEnd={setEnd} />
+          <PeriodPicker period={period} setPeriod={changeFilter(setPeriod)} start={start} setStart={changeFilter(setStart)} end={end} setEnd={changeFilter(setEnd)} />
           <label>Month
             <select value={month} onChange={filter(setMonth)}>
               <option value="">All</option>
@@ -81,7 +82,7 @@ export default function TransactionsPage() {
           </label>
         </div>
         {error && <p className="settings-message is-error" role="alert">{error}</p>}
-        {loading && !data ? <p role="status">Loading transactions…</p> : data && (
+        {loading ? <p role="status">Loading transactions…</p> : !error && data && (
           <>
             <table className="finance-table">
               <caption>{data.total} matching rows · snapshot {data.meta.snapshot_id?.slice(0, 8)}… · rule set v{data.meta.rule_set_version}</caption>
@@ -97,7 +98,7 @@ export default function TransactionsPage() {
                     <td>{row.merchant || '—'}</td>
                     <td>{row.derived?.category || row.category || '—'}</td>
                     <td className={Number(row.amount_eur) < 0 ? 'is-negative' : ''}>{eur(row.amount_eur)}</td>
-                    <td className={Number(row.derived?.effective_budget_amount_eur) < 0 ? 'is-negative' : ''}>{row.derived?.effective_budget_amount_eur == null ? '—' : eur(row.derived.effective_budget_amount_eur)}</td>
+                    <td className={Number(row.derived?.effective_budget_amount_eur) < 0 ? 'is-negative' : ''}>{eur(row.derived?.effective_budget_amount_eur)}</td>
                     <td>{row.derived?.type || row.type || '—'}</td>
                     <td>{row.derived?.rule_id ? `${row.derived.rule_id} ${row.derived.action}${row.derived.excluded ? ' (excluded)' : ''}${row.derived.review ? ' (review)' : ''}` : (row.derived?.excluded ? 'excluded' : '—')}{row.derived?.exclusion_reason && <small> · {row.derived.exclusion_reason.replaceAll('_', ' ')}</small>}</td>
                   </tr>
