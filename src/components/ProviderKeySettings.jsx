@@ -7,7 +7,7 @@ import {
 const PROVIDER_LINKS = {
   openai: ['https://platform.openai.com/api-keys', 'Create an OpenAI API key', 'sk-…'],
   mistral: ['https://console.mistral.ai/api-keys/', 'Create a Mistral API key', 'Enter your Mistral API key'],
-  anthropic: ['https://console.anthropic.com/settings/keys', 'Create a Claude API key', 'sk-ant-…'],
+  anthropic: ['https://platform.claude.com/settings/keys', 'Create a Claude API key', 'sk-ant-…'],
 }
 
 export default function ProviderKeySettings({ provider, selected, onChange, onUnauthorized }) {

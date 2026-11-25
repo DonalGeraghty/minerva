@@ -6,6 +6,7 @@ const items = [
   { to: '/transactions', label: 'Ledger', icon: '▤' },
   { to: '/rules', label: 'Rules', icon: '≡' },
   { to: '/account', label: 'Account', icon: '●' },
+  { to: '/instructions', label: 'Instructions', icon: '?' },
 ]
 
 export default function Dock() {

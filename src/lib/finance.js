@@ -1,5 +1,15 @@
 const euroFormatter = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' })
 
+// Chart geometry uses exact cents; unknown values must never become zero.
+export function moneyCents(value) {
+  const match = /^(-?)(\d+)(?:\.(\d{1,2}))?$/.exec(String(value))
+  if (!match) throw new Error('An amount is unavailable.')
+  const amount = (BigInt(match[2]) * 100n + BigInt((match[3] || '').padEnd(2, '0'))) * (match[1] ? -1n : 1n)
+  const result = Number(amount)
+  if (!Number.isSafeInteger(result)) throw new Error('An amount is outside the supported chart range.')
+  return result
+}
+
 export const PERIODS = [
   { id: 'this_month', label: 'This month' },
   { id: 'last_month', label: 'Last month' },

@@ -27,6 +27,12 @@ export function getCashflow(period, start, end, signal) {
   return apiRequest(`/api/finance/cashflow?${periodParams(period, start, end)}`, { signal })
 }
 
+export function getCategoryCashflow(period, start, end, signal) {
+  const params = periodParams(period, start, end)
+  params.set('by', 'category')
+  return apiRequest(`/api/finance/cashflow?${params}`, { signal })
+}
+
 export function getTransactions({ period, start, end, month, type, category, merchant, search, sort, order, limit, offset }, signal) {
   const params = periodParams(period, start, end)
   for (const [key, value] of Object.entries({ month, type, category, merchant, search, sort, order, limit, offset })) {

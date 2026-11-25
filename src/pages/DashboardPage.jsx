@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import PeriodPicker from '../components/PeriodPicker.jsx'
 import CashflowWaterfall from '../components/CashflowWaterfall.jsx'
-import { getCashflow, getSummary, getSyncStatus } from '../services/finance.js'
+import CashflowMovers from '../components/CashflowMovers.jsx'
+import { getCashflow, getCategoryCashflow, getSummary, getSyncStatus } from '../services/finance.js'
 import { eur, monthLabel } from '../lib/finance.js'
 import './DashboardPage.css'
 
@@ -22,12 +23,17 @@ export default function DashboardPage() {
     setError(null)
     const load = async () => {
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        const [summary, cashflow, status] = await Promise.all([
+        const [summary, cashflow, status, categories] = await Promise.all([
           getSummary(period, start, end, controller.signal), getCashflow(period, start, end, controller.signal), getSyncStatus(controller.signal),
+          getCategoryCashflow(period, start, end, controller.signal).then((value) => ({ value })).catch((failure) => {
+            if (controller.signal.aborted) throw failure
+            return { error: failure.message || 'The category breakdown is unavailable.' }
+          }),
         ])
         if (controller.signal.aborted) return
-        if (summary.meta.snapshot_id === cashflow.meta.snapshot_id && summary.meta.rule_set_version === cashflow.meta.rule_set_version && status.sync.snapshot_id === summary.meta.snapshot_id) {
-          setData({ summary: summary.summary, flow: cashflow.cashflow || [], meta: summary.meta, status: status.sync })
+        const consistentCategories = !categories.value || (categories.value.meta.snapshot_id === summary.meta.snapshot_id && categories.value.meta.rule_set_version === summary.meta.rule_set_version)
+        if (consistentCategories && summary.meta.snapshot_id === cashflow.meta.snapshot_id && summary.meta.rule_set_version === cashflow.meta.rule_set_version && status.sync.snapshot_id === summary.meta.snapshot_id) {
+          setData({ summary: summary.summary, flow: cashflow.cashflow || [], categoryFlow: categories.value?.cashflow || [], categoryError: categories.error, meta: summary.meta, status: status.sync })
           return
         }
       }
@@ -67,5 +73,6 @@ export default function DashboardPage() {
         {(warnings.length > 0 || data.summary.provisional) && <details className="cashflow-quality"><summary>Data notes{warnings.length > 0 ? ` (${warnings.length})` : ''}</summary>{data.summary.provisional && <p>Figures are provisional. The current month may be incomplete and the sinking fund opening balance has not been verified.</p>}{warnings.length > 0 && <ul>{warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul>}<p>Applied rule set v{data.meta.rule_set_version}.</p></details>}
       </>}
     </section>
+    {ready && <CashflowMovers flow={data.flow} categories={data.categoryFlow} error={data.categoryError} stale={data.status.stale} />}
   </main>
 }

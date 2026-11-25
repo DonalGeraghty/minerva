@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import PeriodPicker from '../components/PeriodPicker.jsx'
 import { getTransactions } from '../services/finance.js'
@@ -7,12 +8,17 @@ import { eur, monthLabel } from '../lib/finance.js'
 const TYPES = ['Income', 'Expense', 'Refund', 'Transfer']
 
 export default function TransactionsPage() {
-  const [period, setPeriod] = useState('all')
-  const [start, setStart] = useState('')
-  const [end, setEnd] = useState('')
+  const location = useLocation()
+  const initial = new URLSearchParams(location.search)
+  const from = initial.get('start') || ''
+  const to = initial.get('end') || ''
+  const validRange = /^\d{4}-(0[1-9]|1[0-2])$/.test(from) && /^\d{4}-(0[1-9]|1[0-2])$/.test(to) && from <= to
+  const [period, setPeriod] = useState(validRange ? 'custom' : 'all')
+  const [start, setStart] = useState(validRange ? from : '')
+  const [end, setEnd] = useState(validRange ? to : '')
   const [month, setMonth] = useState('')
   const [type, setType] = useState('')
-  const [category, setCategory] = useState('')
+  const [category, setCategory] = useState((initial.get('category') || '').slice(0, 500))
   const [merchant, setMerchant] = useState('')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('date')
