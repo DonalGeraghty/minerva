@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Minerva",
   "short_name": "Minerva",
-  "description": "Your private personal finance dashboard, read from your own Google Sheets workbook.",
+  "description": "Your personal finance agent: clear answers, cash flow and planning from your imported ledger.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

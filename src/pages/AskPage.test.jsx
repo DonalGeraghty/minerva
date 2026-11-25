@@ -33,7 +33,7 @@ describe('Ask page', () => {
     finance.financeChat.mockResolvedValueOnce({ status: 'success', answer: 'First answer.', meta: META })
     finance.financeChat.mockResolvedValueOnce({ status: 'success', answer: 'Second answer.', meta: META })
     await renderPage()
-    const notice = screen.getByText(/Your question and financial data.*selected AI provider/)
+    const notice = screen.getByText(/Your question and the relevant financial results.*selected AI provider/)
     expect(notice).toBeVisible()
     expect(screen.getByLabelText('Ask a finance question')).toHaveAccessibleDescription(notice.textContent)
     expect(finance.financeChat).not.toHaveBeenCalled()
@@ -60,6 +60,19 @@ describe('Ask page', () => {
     expect(alert).toHaveTextContent('Sync the ledger first')
     expect(alert.querySelector('a')).toHaveAttribute('href', '/account')
     expect(alert.querySelector('a')).toHaveTextContent('Import your ledger in Account')
+  })
+
+  it('brands Ask as a read-only agent and shows the sources checked for an answer', async () => {
+    const user = userEvent.setup()
+    finance.financeChat.mockResolvedValue({ answer: 'October groceries were €42.50.', meta: { ...META, agent: true,
+      sources: [{ label: 'Financial totals', category: 'Groceries', period: { start: '2026-10', end: '2026-10' } }] } })
+    await renderPage()
+    expect(screen.getByRole('heading', { name: 'Ask Minerva.' })).toBeInTheDocument()
+    expect(screen.getByText('Your finance agent · Read-only')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Ask a finance question'), 'Groceries last month?')
+    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    await user.click(await screen.findByText('Checked 1 source'))
+    expect(screen.getByText('Financial totals · Groceries · Oct 2026')).toBeVisible()
   })
 
   it('formats assistant Markdown while preserving literal questions and raw conversation history', async () => {
