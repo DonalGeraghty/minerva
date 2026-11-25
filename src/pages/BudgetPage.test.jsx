@@ -39,7 +39,7 @@ it('generates once, switches limits and retains the mode and category across tab
   expect(screen.getByLabelText('AI assessment for More flexibility')).toHaveTextContent('Allow more flexibility in groceries')
   await user.click(screen.getByRole('button', { name: 'Save more' }))
   expect(createBudgetPlan).toHaveBeenCalledTimes(1)
-  expect(createBudgetPlan).toHaveBeenCalledWith(expect.any(AbortSignal))
+  expect(createBudgetPlan).toHaveBeenCalledWith(expect.any(AbortSignal), expect.any(Function))
   await user.click(screen.getByRole('button', { name: /^Groceries:/ }))
   expect(screen.getByRole('region', { name: 'Groceries breakdown' })).toHaveTextContent('Market')
   await user.click(screen.getByRole('link', { name: 'Other tab' }))
@@ -94,6 +94,25 @@ it('finishes in the background and retains the last chart if reassessment fails'
   await user.click(screen.getByRole('button', { name: /Update with AI/ }))
   expect(await screen.findByRole('alert')).toHaveTextContent('Provider unavailable')
   expect(screen.getByRole('button', { name: /^Groceries:/ })).toHaveAccessibleName(/€500.00 limit/)
+})
+
+it('shows real progress events across tabs and clears them when the plan finishes', async () => {
+  let resolve, progress
+  createBudgetPlan.mockImplementation((_signal, report) => { progress = report; return new Promise((done) => { resolve = done }) })
+  const user = userEvent.setup()
+  open()
+  await user.click(await screen.findByRole('button', { name: /Update with AI/ }))
+  await act(async () => progress('checking'))
+  expect(screen.getByRole('status')).toHaveTextContent('Checking your spending…')
+  await user.click(screen.getByRole('link', { name: 'Other tab' }))
+  await act(async () => progress('reviewing'))
+  await user.click(screen.getByRole('link', { name: 'Budget tab' }))
+  expect(await screen.findByText('Reviewing income and upcoming bills…')).toBeInTheDocument()
+  await act(async () => progress('preparing'))
+  expect(screen.getByText('Preparing your limits…')).toBeInTheDocument()
+  await act(async () => resolve(budgetResult()))
+  expect(screen.queryByText('Preparing your limits…')).not.toBeInTheDocument()
+  expect(createBudgetPlan).toHaveBeenCalledTimes(1)
 })
 
 it('uses the assessment evidence when the initial context fetch is older', async () => {
