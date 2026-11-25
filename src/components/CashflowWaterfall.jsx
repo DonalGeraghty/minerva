@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { extent, scaleBand, scaleLinear } from 'd3'
-import { eur, monthLabel } from '../services/finance.js'
+import { eur, monthLabel } from '../lib/finance.js'
 import { waterfallSteps } from './waterfall.js'
 
 function signedEuro(cents, decimals = 2) {
