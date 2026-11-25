@@ -1,8 +1,11 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import { useTabScroll } from '../context/TabSessionContext.jsx'
 import { useAskConversation } from '../hooks/useAskConversation.js'
 import './AskPage.css'
+
+const ChatMarkdown = lazy(() => import('../components/ChatMarkdown.jsx'))
 
 export default function AskPage() {
   const { messages, input, busy, error, errorCode, meta, setInput, ask, newConversation } = useAskConversation()
@@ -23,9 +26,9 @@ export default function AskPage() {
         <div className="chat-log" data-tab-scroll="chat" aria-live="polite">
           {messages.length === 0 && <p className="finance-empty">No questions yet. Try “How much did I spend on groceries last month?”</p>}
           {messages.map((m, i) => (
-            <div key={i} className={`chat-bubble is-${m.role}`}><strong>{m.role === 'user' ? 'You' : 'Minerva'}</strong><p>{m.content}</p>{m.meta && <small className="chat-answer-meta">Snapshot {m.meta.snapshot_id?.slice(0, 8)}… · rule set v{m.meta.rule_set_version} · {m.meta.provider}/{m.meta.model} · {m.meta.fetched_at}{m.meta.stale ? ' · stale' : ''}</small>}</div>
+            <div key={i} className={`chat-bubble is-${m.role}`}><strong className="chat-speaker">{m.role === 'user' ? 'You' : 'Minerva'}</strong>{m.role === 'assistant' ? <Suspense fallback={<p>{m.content}</p>}><ChatMarkdown>{m.content}</ChatMarkdown></Suspense> : <p>{m.content}</p>}{m.meta && <small className="chat-answer-meta">Snapshot {m.meta.snapshot_id?.slice(0, 8)}… · rule set v{m.meta.rule_set_version} · {m.meta.provider}/{m.meta.model} · {m.meta.fetched_at}{m.meta.stale ? ' · stale' : ''}</small>}</div>
           ))}
-          {busy && <div className="chat-bubble is-assistant"><strong>Minerva</strong><p>Thinking…</p></div>}
+          {busy && <div className="chat-bubble is-assistant"><strong className="chat-speaker">Minerva</strong><p>Thinking…</p></div>}
         </div>
         {error && (
           <p className="settings-message is-error" role="alert">
