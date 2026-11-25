@@ -1,12 +1,4 @@
-// Exact cents for chart positions; the authoritative total comes from Janus.
-function cents(value) {
-  const match = /^(-?)(\d+)(?:\.(\d{1,2}))?$/.exec(String(value))
-  if (!match) throw new Error('A monthly amount is unavailable.')
-  const amount = (BigInt(match[2]) * 100n + BigInt((match[3] || '').padEnd(2, '0'))) * (match[1] ? -1n : 1n)
-  const result = Number(amount)
-  if (!Number.isSafeInteger(result)) throw new Error('A monthly amount is outside the supported chart range.')
-  return result
-}
+import { moneyCents as cents } from '../lib/finance.js'
 
 export function waterfallSteps(data, total) {
   const seen = new Set()
