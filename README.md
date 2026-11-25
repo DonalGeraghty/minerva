@@ -7,7 +7,7 @@ Minerva is a private personal finance dashboard built with React and Vite. It re
 - **Dashboard (`/`):** a D3 monthly net waterfall, with a six-month default and selectable presets/custom whole-month ranges. The waterfall builds a running net from zero and shows a gold period total. Select a month to replace the chart with its income, spending categories and refunds, ending at the same monthly net. Back to months restores the original waterfall and date range. Month columns support mouse, touch, and keyboard navigation; category bars and totals are informational. It reconciles in exact cents against Janus monthly totals and rejects mixed snapshot/rule versions. Import controls live in Account; data notes, gaps and stale indicators remain visible.
 - **Ledger (`/transactions`):** filterable, paginated transaction table (month, type, category, merchant, search, sorting) with the rule that interpreted each row and excluded/review flags.
 - **Rules (`/rules`):** the account-owned finance rule set. Lists, searches and filters rules; adds, edits, enables/disables and deletes them individually (deletes are soft and kept in version history); and imports a rules CSV with a preview step (create/update/unchanged counts, held-for-review and conflicting rows) before an explicit commit. CSV and lossless JSON exports are available, and any previous rule-set version can be restored from the history panel.
-- **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored; each answer shows the privacy note.
+- **Ask (`/ask`):** chat with your selected AI provider about the synced ledger. Janus computes a bounded read-only context server-side (the model never calculates) and returns the answer plus provenance (snapshot ID, rule-set version, provider/model, freshness, coverage). Prompts and answers are not stored on the server. The current conversation stays in browser memory during navigation; each answer retains its original provenance.
 - **Account (`/account`):** connect, replace or disconnect your Google Sheets finance workbook, manage shared account settings, and sign out.
 - **Instructions (`/instructions`):** a human setup guide and copyable/downloadable LLM brief covering navigation, Sheet sharing and approval, ledger columns, manual/CSV rules, supported actions, review-first activation, and provider API-key/model setup. Includes a synthetic example CSV and official provider links. The rule brief uses the application's existing field/operator enums.
 
@@ -56,6 +56,12 @@ To start the services separately, run `run_demo.py` in Janus, then
 and Minerva to http://127.0.0.1:5173, overriding any production API URL in `.env`.
 Normal `npm run dev` retains the configured API and does not offer the demo button.
 Production builds exclude the demo credentials.
+
+## Tab session state
+
+Switching tabs preserves the Ask conversation and unfinished question, Dashboard period and category drilldown, Ledger filters/sort/page, Rules filters and unfinished edits/import previews, and the Instructions audience. Ask requests can finish while another tab is open. **New conversation** clears the chat and cancels any pending answer. Reports reload on return so imports and rule changes are reflected without resetting your choices. Rule drafts retain the revision they were originally opened against.
+
+This state is held only in memory for the signed-in account. Refreshing, closing the app, signing out or switching accounts clears it; passwords and API-key entry fields are never retained across tabs. Page and named chart/table/chat scroll positions are restored when their content is ready.
 
 ## Responsive layout
 

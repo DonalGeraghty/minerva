@@ -1,3 +1,4 @@
+import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
@@ -49,20 +50,22 @@ export default function RulesPage() {
   const [error, setError] = useState('')
   const [errorCode, setErrorCode] = useState('')
   const [notice, setNotice] = useState('')
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [scopeFilter, setScopeFilter] = useState('')
-  const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [formError, setFormError] = useState('')
-  const [csvText, setCsvText] = useState('')
-  const [importName, setImportName] = useState('')
-  const [preview, setPreview] = useState(null)
-  const [history, setHistory] = useState(null)
+  const [search, setSearch] = useTabState('rules.search', '')
+  const [statusFilter, setStatusFilter] = useTabState('rules.statusFilter', '')
+  const [scopeFilter, setScopeFilter] = useTabState('rules.scopeFilter', '')
+  const [editing, setEditing] = useTabState('rules.editing', null)
+  const [editingRevision, setEditingRevision] = useTabState('rules.editingRevision', null)
+  const [form, setForm] = useTabState('rules.form', EMPTY_FORM)
+  const [formError, setFormError] = useTabState('rules.formError', '')
+  const [csvText, setCsvText] = useTabState('rules.csvText', '')
+  const [importName, setImportName] = useTabState('rules.importName', '')
+  const [preview, setPreview] = useTabState('rules.preview', null)
+  const [history, setHistory] = useTabState('rules.history', null)
   const fileInput = useRef(null)
   const editorDialog = useRef(null)
   const abort = useRef(null)
 
+  useTabScroll('rules', !loading)
   const load = useCallback(async () => {
     abort.current?.abort()
     const controller = new AbortController()
@@ -72,6 +75,7 @@ export default function RulesPage() {
     setErrorCode('')
     try {
       const data = await listFinanceRules({ includeDeleted: true, signal: controller.signal })
+      if (controller.signal.aborted) return
       setRules(data.rules || [])
       setRuleSetVersion(data.rule_set_version || 0)
     } catch (requestError) {
@@ -103,9 +107,9 @@ export default function RulesPage() {
     return true
   }), [rules, search, statusFilter, scopeFilter])
 
-  const startCreate = () => { setEditing('new'); setForm(EMPTY_FORM); setFormError('') }
-  const startEdit = (rule) => { setEditing(rule.rule_id); setForm(ruleToForm(rule)); setFormError('') }
-  const closeEditor = () => { editorDialog.current?.close(); setEditing(null); setForm(EMPTY_FORM); setFormError('') }
+  const startCreate = () => { setEditing('new'); setEditingRevision(null); setForm(EMPTY_FORM); setFormError('') }
+  const startEdit = (rule) => { setEditing(rule.rule_id); setEditingRevision(rule.revision); setForm(ruleToForm(rule)); setFormError('') }
+  const closeEditor = () => { editorDialog.current?.close(); setEditing(null); setEditingRevision(null); setForm(EMPTY_FORM); setFormError('') }
 
   const saveRule = async (event) => {
     event.preventDefault()
@@ -118,8 +122,7 @@ export default function RulesPage() {
         await createFinanceRule(payload)
         setNotice(`Created rule ${payload.rule_id}.`)
       } else {
-        const current = rules.find((rule) => rule.rule_id === editing)
-        await updateFinanceRule(editing, { ...payload, revision: current?.revision })
+        await updateFinanceRule(editing, { ...payload, revision: editingRevision })
         setNotice(`Updated rule ${editing}.`)
       }
       closeEditor()
@@ -203,6 +206,15 @@ export default function RulesPage() {
       setBusy(false)
     }
   }
+
+  const refreshPreview = async () => {
+    setBusy(true)
+    setError('')
+    try { setPreview(await previewRulesImport(csvText)) }
+    catch (requestError) { setError(requestError.message || 'Could not preview the CSV') }
+    finally { setBusy(false) }
+  }
+  const previewChanged = preview?.rule_set_version != null && preview.rule_set_version !== ruleSetVersion
 
   const onExport = async (format) => {
     setBusy(true)
@@ -298,7 +310,9 @@ export default function RulesPage() {
             <p>{preview.changes.length} row(s): {preview.changes.filter((c) => c.change === 'create').length} to create, {preview.changes.filter((c) => c.change === 'update').length} to update, {preview.changes.filter((c) => c.change === 'unchanged').length} unchanged. {preview.held.length} held for review. {preview.conflicts.length} conflict group(s). New rule-set version would be {preview.would_be_version}.</p>
             {preview.held.length > 0 && <ul>{preview.held.map((item) => <li key={item.rule_id}>{item.rule_id}: {item.reason}</li>)}</ul>}
             {preview.conflicts.length > 0 && <ul>{preview.conflicts.map((conflict) => <li key={conflict.rule_ids.join(',')}>Conflict on {conflict.field} {conflict.operator} {conflict.value}: {conflict.rule_ids.join(', ')}</li>)}</ul>}
-            <button className="primary-button" type="button" onClick={commitImport} disabled={busy}>{busy ? 'Importing…' : 'Commit import'}</button>
+            {previewChanged && <p role="status">The rule set has changed since this preview. Review the saved CSV again before importing.</p>}
+            {previewChanged && <button className="secondary-button" type="button" onClick={refreshPreview} disabled={busy || loading}>Review saved CSV again</button>}
+            <button className="primary-button" type="button" onClick={commitImport} disabled={busy || loading || previewChanged}>{busy ? 'Importing…' : 'Commit import'}</button>
           </div>
         )}
 

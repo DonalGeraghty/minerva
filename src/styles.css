@@ -218,3 +218,5 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
   .finance-pager { display: flex; flex-wrap: wrap; gap: .75rem; }
   .page { padding-bottom: calc(8rem + env(safe-area-inset-bottom)); }
 }
+
+.chat-answer-meta { display: block; margin-top: .7rem; color: var(--muted); font-size: .65rem; overflow-wrap: anywhere; }

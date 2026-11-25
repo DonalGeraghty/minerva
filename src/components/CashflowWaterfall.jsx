@@ -1,3 +1,4 @@
+import { useTabState } from '../context/TabSessionContext.jsx'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { extent, scaleBand, scaleLinear } from 'd3'
 import { getCashflowBreakdown } from '../services/finance.js'
@@ -16,14 +17,14 @@ function labelLines(label) {
 export default function CashflowWaterfall({ data, total, meta }) {
   const id = useId().replaceAll(':', '')
   const [activeKey, setActiveKey] = useState(null)
-  const [selectedMonth, setSelectedMonth] = useState(null)
+  const [selectedMonth, setSelectedMonth] = useTabState('dashboard.drilldown', null)
   const [detail, setDetail] = useState(null)
   const [attempt, setAttempt] = useState(0)
   const [chartSize, setChartSize] = useState({ width: 800, height: 385 })
   const backButton = useRef(null)
   const monthButtons = useRef(new Map())
   const scroll = useRef(null)
-  const savedScroll = useRef(0)
+  const [savedScroll, setSavedScroll] = useTabState('dashboard.monthScroll', 0)
   const selected = data.find((row) => row.month === selectedMonth)
   useEffect(() => {
     const element = scroll.current
@@ -58,7 +59,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
     }
   }, [selectedMonth])
   const openMonth = (month) => {
-    savedScroll.current = scroll.current?.scrollLeft || 0
+    setSavedScroll(scroll.current?.scrollLeft || 0)
     setActiveKey(null)
     setDetail(null)
     setSelectedMonth(month)
@@ -70,7 +71,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
     setActiveKey(null)
     requestAnimationFrame(() => {
       monthButtons.current.get(month)?.focus({ preventScroll: true })
-      if (scroll.current) scroll.current.scrollLeft = savedScroll.current
+      if (scroll.current) scroll.current.scrollLeft = savedScroll
     })
   }
   const model = useMemo(() => {
@@ -99,7 +100,7 @@ export default function CashflowWaterfall({ data, total, meta }) {
   const ticks = y.ticks(5)
   if (!ticks.includes(0)) ticks.push(0)
   return <div className="waterfall-visual">{toolbar}
-    <div ref={scroll} className="waterfall-scroll" role="region" aria-label="Cash flow waterfall, scroll horizontally for more columns" tabIndex={0}>
+    <div ref={scroll} data-tab-scroll="waterfall" className="waterfall-scroll" role="region" aria-label="Cash flow waterfall, scroll horizontally for more columns" tabIndex={0}>
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width, height }} role="group" aria-label={chartTitle} aria-describedby={`${id}-description`}>
         <title>{chartTitle}</title><desc id={`${id}-description`}>{selectedMonth ? "Starting at zero, income, spending categories and refunds build to the selected month’s net cash flow." : "Starting at zero for this period, each month adds or subtracts its net cash flow. Select a month for its category breakdown."} The gold column is the net total. This is not an account balance.</desc>
         <defs>{[['positive', '#9bd6b5', '#579d7b'], ['negative', '#e5a09a', '#bb6c68'], ['total', '#e7d4a2', '#ad9156']].map(([name, from, to]) => <linearGradient key={name} id={`${id}-${name}`} x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor={from} /><stop offset="100%" stopColor={to} /></linearGradient>)}</defs>

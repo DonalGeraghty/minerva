@@ -1,3 +1,4 @@
+import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
@@ -16,8 +17,9 @@ function Chapter({ number, title, id, children }) {
 }
 
 export default function InstructionsPage() {
-  const [audience, setAudience] = useState('people')
+  const [audience, setAudience] = useTabState('instructions.audience', 'people')
   const [notice, setNotice] = useState('')
+  useTabScroll('instructions', true)
   const brief = useRef(null)
   async function copyBrief() {
     try { await navigator.clipboard.writeText(LLM_RULE_BRIEF); setNotice('LLM brief copied. Paste it into your preferred AI chat, then add anonymised examples.') }

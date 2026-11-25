@@ -1,3 +1,4 @@
+import { useTabState, useTabScroll } from '../context/TabSessionContext.jsx'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
@@ -8,12 +9,14 @@ import { eur, monthLabel } from '../lib/finance.js'
 import './DashboardPage.css'
 
 export default function DashboardPage() {
-  const [period, setPeriod] = useState('last_6')
-  const [start, setStart] = useState('')
-  const [end, setEnd] = useState('')
+  const [period, setPeriod] = useTabState('dashboard.period', 'last_6')
+  const [start, setStart] = useTabState('dashboard.start', '')
+  const [end, setEnd] = useTabState('dashboard.end', '')
+  const [, setDrilldown] = useTabState('dashboard.drilldown', null)
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  useTabScroll('dashboard', !loading)
   const rangeError = period === 'custom' && (!start || !end ? 'Choose a start and end month.' : start > end ? 'The start month must be before the end month.' : '')
   useEffect(() => {
     if (rangeError) { setLoading(false); return }
@@ -39,12 +42,15 @@ export default function DashboardPage() {
     return () => controller.abort()
   }, [period, start, end, rangeError])
   const selectPeriod = (next) => {
+    setDrilldown(null)
     if (next === 'custom') {
       setStart(data?.summary.period?.start || data?.meta.coverage?.first_month || '')
       setEnd(data?.summary.period?.end || data?.meta.coverage?.last_month || '')
     }
     setPeriod(next)
   }
+  const changeStart = (value) => { setDrilldown(null); setStart(value) }
+  const changeEnd = (value) => { setDrilldown(null); setEnd(value) }
   const ready = !loading && !error && !rangeError && data
   const warnings = data ? [...(data.meta.warnings || []), ...(data.summary.receipt_conflicts || [])] : []
   const gaps = data?.summary.gaps || []
@@ -54,7 +60,7 @@ export default function DashboardPage() {
     <Brand />
     <section className="dashboard-hero"><p className="eyebrow">Your finances · dashboard</p><h1>Cash flow.</h1><p>A little perspective on the months that add up.</p></section>
     <section className="cashflow-panel" aria-labelledby="cashflow-heading" aria-busy={loading}>
-      <header className="cashflow-heading"><div><p className="cashflow-total-label">Net over this period {ready && data.meta.source === 'local_demo' && <span className="cashflow-demo">Demo data</span>}</p><h2 id="cashflow-heading" className={`cashflow-total${ready && Number(data.summary.adjusted_totals.net) < 0 ? ' is-negative' : ''}`}>{ready && data.flow.length && data.summary.adjusted_totals.net != null ? eur(data.summary.adjusted_totals.net) : '—'}</h2>{ready && <p className="cashflow-period">{periodLabel}</p>}</div><PeriodPicker period={period} setPeriod={selectPeriod} start={start} setStart={setStart} end={end} setEnd={setEnd} /></header>
+      <header className="cashflow-heading"><div><p className="cashflow-total-label">Net over this period {ready && data.meta.source === 'local_demo' && <span className="cashflow-demo">Demo data</span>}</p><h2 id="cashflow-heading" className={`cashflow-total${ready && Number(data.summary.adjusted_totals.net) < 0 ? ' is-negative' : ''}`}>{ready && data.flow.length && data.summary.adjusted_totals.net != null ? eur(data.summary.adjusted_totals.net) : '—'}</h2>{ready && <p className="cashflow-period">{periodLabel}</p>}</div><PeriodPicker period={period} setPeriod={selectPeriod} start={start} setStart={changeStart} end={end} setEnd={changeEnd} /></header>
       {rangeError && <p className="dashboard-message" role="alert">{rangeError}</p>}
       {loading && !rangeError && <div className="cashflow-loading" role="status"><span /><p>Bringing your months into view…</p></div>}
       {error && !rangeError && <div className="dashboard-message is-error" role="alert"><p>{error.message}</p>{['finance_not_connected', 'sync_required'].includes(error.code) ? <Link to="/account">Import your workbook in Account →</Link> : <button className="secondary-button" type="button" onClick={() => window.location.reload()}>Try again</button>}</div>}

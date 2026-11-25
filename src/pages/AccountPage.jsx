@@ -1,3 +1,4 @@
+import { useTabScroll } from '../context/TabSessionContext.jsx'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AISettings from '../components/AISettings.jsx'
@@ -6,6 +7,7 @@ import FinanceConnectionSettings from '../components/FinanceConnectionSettings.j
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function AccountPage() {
+  useTabScroll('account')
   const { user, deleteAccount, logout } = useAuth()
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
