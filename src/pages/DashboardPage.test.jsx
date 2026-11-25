@@ -24,7 +24,7 @@ describe('Dashboard waterfall', () => {
   it('supports custom whole-month dates and validates reversed ranges locally', async () => {
     const user = userEvent.setup()
     renderPage()
-    await screen.findByRole('img', { name: 'Monthly net cash flow waterfall' })
+    await screen.findByRole('group', { name: 'Monthly net cash flow waterfall' })
     expect(screen.getByRole('heading', { name: '€2,017.66' })).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText('Period'), 'custom')
     expect(screen.getByLabelText('From (YYYY-MM)')).toHaveValue('2026-10')
@@ -33,7 +33,7 @@ describe('Dashboard waterfall', () => {
     fireEvent.change(screen.getByLabelText('From (YYYY-MM)'), { target: { value: '2026-12' } })
     expect(await screen.findByRole('alert')).toHaveTextContent('start month must be before')
     expect(finance.getSummary).toHaveBeenCalledTimes(count)
-    expect(screen.queryByRole('img', { name: 'Monthly net cash flow waterfall' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Monthly net cash flow waterfall' })).not.toBeInTheDocument()
   })
 
   it('keeps a stale warning and gaps without inventing missing months', async () => {
@@ -42,7 +42,7 @@ describe('Dashboard waterfall', () => {
     renderPage()
     expect(await screen.findByText(/Showing saved data/)).toBeInTheDocument()
     expect(screen.getByText(/These are gaps, not zero activity/)).toBeInTheDocument()
-    expect(screen.queryByRole('img', { name: /^Sep 2026:/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^Sep 2026:/ })).not.toBeInTheDocument()
   })
 
   it('rejects mixed snapshot or rule versions after one retry', async () => {
@@ -50,7 +50,7 @@ describe('Dashboard waterfall', () => {
     renderPage()
     expect(await screen.findByRole('alert')).toHaveTextContent('data changed while loading')
     expect(finance.getCashflow).toHaveBeenCalledTimes(2)
-    expect(screen.queryByRole('img', { name: 'Monthly net cash flow waterfall' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Monthly net cash flow waterfall' })).not.toBeInTheDocument()
   })
 
   it('shows an empty state for a period with no recorded activity', async () => {

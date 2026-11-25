@@ -26,7 +26,7 @@
 .waterfall-grid text, .waterfall-zero text { fill: #8e9384; font-size: 10px; font-family: 'DM Mono', monospace; }
 .waterfall-zero line { stroke: #656858; stroke-width: 1; }
 .waterfall-connector { stroke: #8c8d795c; stroke-width: 1; stroke-dasharray: 3 4; }
-.waterfall-step { outline: none; transition: opacity 160ms ease; }
+.waterfall-step { outline: none; cursor: pointer; text-decoration: none; transition: opacity 160ms ease; }
 .waterfall-step.is-muted { opacity: .4; }
 .waterfall-column { stroke: #ffffff12; stroke-width: 1; transition: filter 160ms ease; }
 .waterfall-step:focus .waterfall-column, .waterfall-step:hover .waterfall-column { stroke: #f4ecc8; stroke-width: 1.5; filter: brightness(1.1); }
