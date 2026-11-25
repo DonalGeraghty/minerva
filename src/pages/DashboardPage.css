@@ -1,0 +1,69 @@
+.dashboard-page { width: min(calc(100% - 3rem), 72rem); }
+.dashboard-hero { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 2rem; padding: 1.8rem 0 1.5rem; }
+.dashboard-hero .eyebrow { grid-column: 1 / -1; }
+.dashboard-hero h1 { margin: 0; color: #f3f0e7; font-size: clamp(2.8rem, 6vw, 4.5rem); font-weight: 500; letter-spacing: -.065em; line-height: 1.1; }
+.dashboard-hero > p:last-child { max-width: 15rem; margin: 0 0 .35rem; color: #a5a198; font-size: .8rem; line-height: 1.7; }
+.cashflow-panel { overflow: hidden; border: 1px solid #343128; border-radius: 1.2rem; background: radial-gradient(ellipse at 45% 0%, #24221944, transparent 65%), #0d0e0c; box-shadow: 0 1.5rem 5rem #0003; }
+.cashflow-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; padding: 1.6rem 2rem; border-bottom: 1px solid #2b2a23; }
+.cashflow-heading .period-picker { gap: .6rem; }
+.cashflow-heading .period-picker label { color: #aaa79d; font-size: .68rem; }
+.cashflow-heading .period-picker select, .cashflow-heading .period-picker input { min-height: 2.5rem; padding-inline: .8rem; border-color: #423c2e; background: #191811; font-size: .75rem; }
+.cashflow-total-label { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin: 0; color: #aaa79d; font-size: .75rem; }
+.cashflow-demo { padding: .15rem .45rem; border: 1px solid #4d442f; border-radius: .3rem; color: #d3c08b; font-family: 'DM Mono', monospace; font-size: .55rem; }
+.cashflow-total { margin: .45rem 0 .35rem; color: #e9e2cf; font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; letter-spacing: -.05em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.cashflow-total.is-negative { color: #e3a09a; }
+.cashflow-period { margin: 0; color: #aaa79d; font-size: .72rem; }
+.waterfall-legend { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.1rem 2rem 0; }
+.waterfall-legend span { display: inline-flex; align-items: center; gap: .4rem; color: #b8b3a8; font-size: .65rem; }
+.waterfall-legend i { width: .45rem; height: .45rem; border-radius: 2px; }
+.legend-positive { background: #87c3a1; }
+.legend-negative { background: #d58d87; }
+.legend-total { background: #d8bf83; }
+.waterfall-visual { position: relative; margin: 0 .8rem; }
+.waterfall-scroll { width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #62563c #12130f; }
+.waterfall-scroll svg { display: block; width: 100%; height: auto; }
+.waterfall-grid line { stroke: #292c23; stroke-width: 1; stroke-dasharray: 3 6; }
+.waterfall-grid text, .waterfall-zero text { fill: #8e9384; font-size: 10px; font-family: 'DM Mono', monospace; }
+.waterfall-zero line { stroke: #656858; stroke-width: 1; }
+.waterfall-connector { stroke: #8c8d795c; stroke-width: 1; stroke-dasharray: 3 4; }
+.waterfall-step { outline: none; transition: opacity 160ms ease; }
+.waterfall-step.is-muted { opacity: .4; }
+.waterfall-column { stroke: #ffffff12; stroke-width: 1; transition: filter 160ms ease; }
+.waterfall-step:focus .waterfall-column, .waterfall-step:hover .waterfall-column { stroke: #f4ecc8; stroke-width: 1.5; filter: brightness(1.1); }
+.waterfall-value { fill: #c9d6ca; font-size: 11px; font-family: 'DM Mono', monospace; }
+.waterfall-step.is-negative .waterfall-value { fill: #e6a49d; }
+.waterfall-step.is-total .waterfall-value { fill: #e2cfa1; }
+.waterfall-month { fill: #d0d0c2; font-size: 12px; }
+.waterfall-year { fill: #868b7b; font-size: 9px; }
+.waterfall-insight { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .65rem; min-height: 2.7rem; padding: .5rem; color: #959c8b; font-size: .68rem; }
+.waterfall-insight strong { color: #e3dfd2; font-family: 'DM Mono', monospace; font-size: .75rem; font-weight: 400; }
+.waterfall-empty { display: grid; justify-items: center; gap: .6rem; padding: 4rem 1.5rem; text-align: center; }
+.waterfall-empty > span { color: var(--gold); font-size: 2rem; }
+.waterfall-empty h3 { margin: 0; font-size: 1rem; font-weight: 500; }
+.waterfall-empty p { margin: 0; color: #aaa79d; font-size: .8rem; }
+.cashflow-footer { padding: 1.1rem 2rem 1.4rem; border-top: 1px solid #2b2e25; background: #ffffff02; }
+.cashflow-footer > p { margin: 0 0 .7rem; color: #b6b6a7; font-size: .73rem; line-height: 1.6; }
+.cashflow-footer > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .6rem; color: #8c9381; font-size: .68rem; }
+.cashflow-footer a { color: #d8c28a; text-decoration: none; }
+.cashflow-footer a:hover { text-decoration: underline; text-underline-offset: .3rem; }
+.cashflow-quality { padding: 1rem 2rem; border-top: 1px solid #292b22; color: #a4a993; font-size: .72rem; line-height: 1.7; }
+.cashflow-quality summary { cursor: pointer; }
+.dashboard-message { margin: 1.2rem 2rem; padding: .85rem 1rem; border: 1px solid #675432; border-radius: .5rem; color: #d8c498; background: #221e13; font-size: .78rem; line-height: 1.7; }
+.dashboard-message p { margin: 0 0 .5rem; }
+.dashboard-message.is-error { border-color: #663e37; color: #e0b2a7; background: #201412; }
+.cashflow-loading { display: grid; justify-items: center; place-content: center; min-height: 24rem; gap: .8rem; color: #a5aa96; font-size: .8rem; }
+.cashflow-loading > span { width: 2rem; height: 2rem; border: 1px solid #363a2b; border-top-color: #c8b479; border-radius: 50%; animation: cashflow-spin 1s linear infinite; }
+@keyframes cashflow-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cashflow-loading > span { animation: none; } .waterfall-step, .waterfall-column { transition: none; } }
+@media (max-width: 42rem) {
+  .dashboard-page { width: calc(100% - 1rem); }
+  .dashboard-hero { grid-template-columns: 1fr; gap: .6rem; padding: 2rem .5rem 1.5rem; }
+  .dashboard-hero > p:last-child { max-width: none; }
+  .cashflow-heading { padding: 1.25rem; }
+  .cashflow-heading .period-picker { width: 100%; }
+  .cashflow-heading .period-picker label { flex: 1; }
+  .cashflow-heading .period-picker select, .cashflow-heading .period-picker input { width: 100%; min-width: 0; }
+  .waterfall-legend { justify-content: flex-start; gap: .8rem; padding-inline: 1.25rem; }
+  .cashflow-footer, .cashflow-quality { padding: 1rem 1.25rem; }
+  .dashboard-message { margin: 1rem 1.25rem; }
+}

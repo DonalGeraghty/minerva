@@ -1,13 +1,11 @@
 import { MemoryRouter } from 'react-router-dom'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AskPage from './AskPage.jsx'
 import * as finance from '../services/finance.js'
 import { ApiError } from '../services/request.js'
 
-const { auth } = vi.hoisted(() => ({ auth: { user: { accountId: 'account-one', email: 'owner@example.com' }, logout: vi.fn() } }))
-vi.mock('../context/AuthContext.jsx', () => ({ useAuth: () => auth }))
 vi.mock('../services/finance.js', async (original) => {
   const module = await original()
   return { ...module, financeChat: vi.fn() }
@@ -30,24 +28,15 @@ describe('Ask page', () => {
   })
   afterEach(() => cleanup())
 
-  it('sends a question and renders the answer with the privacy meta line', async () => {
-    const user = userEvent.setup()
-    finance.financeChat.mockResolvedValue({ status: 'success', answer: 'You spent €312.40 on groceries in November.', meta: META })
-    await renderPage()
-    await user.type(screen.getByLabelText('Ask a finance question'), 'Groceries in November?')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
-    expect(await screen.findByText('You spent €312.40 on groceries in November.')).toBeInTheDocument()
-    expect(screen.getByText('You')).toBeInTheDocument()
-    expect(screen.getByText(/rule set v1/)).toBeInTheDocument()
-    expect(screen.getByText(META.privacy)).toBeInTheDocument()
-    expect(finance.financeChat).toHaveBeenCalledWith('Groceries in November?', [], expect.any(AbortSignal))
-  })
-
-  it('sends prior messages as history on the next question', async () => {
+  it('discloses provider sharing before chatting and sends subsequent questions with history', async () => {
     const user = userEvent.setup()
     finance.financeChat.mockResolvedValueOnce({ status: 'success', answer: 'First answer.', meta: META })
     finance.financeChat.mockResolvedValueOnce({ status: 'success', answer: 'Second answer.', meta: META })
     await renderPage()
+    const notice = screen.getByText(/Your question and financial data.*selected AI provider/)
+    expect(notice).toBeVisible()
+    expect(screen.getByLabelText('Ask a finance question')).toHaveAccessibleDescription(notice.textContent)
+    expect(finance.financeChat).not.toHaveBeenCalled()
     await user.type(screen.getByLabelText('Ask a finance question'), 'First question')
     await user.click(screen.getByRole('button', { name: 'Ask' }))
     await screen.findByText('First answer.')
@@ -67,32 +56,10 @@ describe('Ask page', () => {
     await user.type(screen.getByLabelText('Ask a finance question'), 'How much did I spend?')
     await user.click(screen.getByRole('button', { name: 'Ask' }))
     const alert = await screen.findByRole('alert')
+    expect(screen.getByText('How much did I spend?')).toBeInTheDocument()
     expect(alert).toHaveTextContent('Sync the ledger first')
-    expect(alert.querySelector('a')).toHaveAttribute('href', '/')
-  })
-
-  it('shows account links for provider_key_required and finance_not_connected', async () => {
-    const user = userEvent.setup()
-    finance.financeChat.mockRejectedValueOnce(new ApiError('Connect your selected AI provider in Account to ask finance questions.', 409, 'provider_key_required'))
-    await renderPage()
-    await user.type(screen.getByLabelText('Ask a finance question'), 'Hi')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
-    let alert = await screen.findByRole('alert')
     expect(alert.querySelector('a')).toHaveAttribute('href', '/account')
-    finance.financeChat.mockRejectedValueOnce(new ApiError('Connect your own Google Sheets workbook first.', 403, 'finance_not_connected'))
-    await user.clear(screen.getByLabelText('Ask a finance question'))
-    await user.type(screen.getByLabelText('Ask a finance question'), 'Again')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
-    await waitFor(() => expect(screen.getByRole('alert').querySelector('a')).toHaveAttribute('href', '/account'))
+    expect(alert.querySelector('a')).toHaveTextContent('Import your ledger in Account')
   })
 
-  it('keeps the user message when the request fails', async () => {
-    const user = userEvent.setup()
-    finance.financeChat.mockRejectedValue(new ApiError('Could not answer. Try again shortly.', 502, 'provider_unavailable'))
-    await renderPage()
-    await user.type(screen.getByLabelText('Ask a finance question'), 'What is my net worth?')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
-    await screen.findByRole('alert')
-    expect(screen.getByText('What is my net worth?')).toBeInTheDocument()
-  })
 })

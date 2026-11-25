@@ -11,6 +11,18 @@ export default function LoginSplash() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
+  const useDemo = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await loginAsDemo()
+    } catch (requestError) {
+      setError(requestError.message || 'Could not reach the local Janus demo. Start run_demo.py first.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const submit = async (event) => {
     event.preventDefault()
     setBusy(true)
@@ -33,7 +45,7 @@ export default function LoginSplash() {
           <div>
             <p className="eyebrow">Your finances, together</p>
             <h1>Your money.<br />In view.</h1>
-            <p>Connect your Google Sheets workbook to explore spending, rules and wealth in one private dashboard.</p>
+            <p>Connect your Google Sheets workbook to explore cash flow, transactions and rules in one private dashboard.</p>
           </div>
         </section>
         <section className="auth-panel" aria-labelledby="auth-title">
@@ -42,14 +54,14 @@ export default function LoginSplash() {
             <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => { setMode('login'); setError('') }}>Sign in</button>
             <button type="button" role="tab" aria-selected={mode === 'register'} onClick={() => { setMode('register'); setError('') }}>Register</button>
           </div>
-          {import.meta.env.DEV && <button className="demo-login-button" type="button" onClick={() => { setError(''); loginAsDemo() }}><strong>Use demo account</strong><span>Preview Minerva · no workbook connected</span></button>}
+          {import.meta.env.DEV && import.meta.env.VITE_LOCAL_DEMO === 'true' && <button className="demo-login-button" type="button" disabled={busy} onClick={useDemo}><strong>Use demo account</strong><span>Local Janus · synthetic finance data</span></button>}
           <form className="auth-form" onSubmit={submit}>
             <label htmlFor="auth-email">Email<input id="auth-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
             <label htmlFor="auth-password">Password<input id="auth-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength="8" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
             {error && <p className="auth-error" role="alert">{error}</p>}
             <button className="primary-button auth-submit" type="submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}</button>
           </form>
-          {import.meta.env.DEV && <p className="demo-login-note">Local demo only — no API keys, AI calls, or server data.</p>}
+          {import.meta.env.DEV && import.meta.env.VITE_LOCAL_DEMO === 'true' && <p className="demo-login-note">Synthetic data resets when Janus restarts. No Google or AI credentials needed.</p>}
         </section>
       </div>
     </main>

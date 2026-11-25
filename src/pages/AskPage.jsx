@@ -48,7 +48,7 @@ export default function AskPage() {
         <p>Ask questions about your synced ledger. Janus computes every figure server-side; your selected AI provider only reads the bounded context. Answers are not stored.</p>
       </section>
       <section className="app-panel" aria-label="Finance chat">
-        {meta?.privacy && <p className="settings-message">{meta.privacy}</p>}
+        <p id="finance-chat-privacy" className="settings-message">{meta?.privacy || 'Your question and financial data from your imported workbook are sent to your selected AI provider. Review the provider’s privacy settings before sending.'}</p>
         {meta && <p className="finance-meta">Snapshot {meta.snapshot_id?.slice(0, 8)}… · rule set v{meta.rule_set_version} · {meta.provider}/{meta.model} · synced {new Date(meta.fetched_at).toLocaleString()}{meta.stale ? ' · stale' : ''} · coverage {meta.coverage?.first_month || '—'} to {meta.coverage?.last_month || '—'}</p>}
         <div className="chat-log" aria-live="polite">
           {messages.length === 0 && <p className="finance-empty">No questions yet. Try “How much did I spend on groceries last month?”</p>}
@@ -60,14 +60,14 @@ export default function AskPage() {
         {error && (
           <p className="settings-message is-error" role="alert">
             {error}
-            {errorCode === 'sync_required' && <> <Link to="/">Sync the ledger on the Dashboard first.</Link></>}
+            {errorCode === 'sync_required' && <> <Link to="/account">Import your ledger in Account.</Link></>}
             {errorCode === 'provider_key_required' && <> <Link to="/account">Connect your AI provider in Account.</Link></>}
             {(errorCode === 'finance_not_connected') && <> <Link to="/account">Connect your workbook in Account.</Link></>}
           </p>
         )}
         <form onSubmit={ask} className="chat-form">
           <label htmlFor="chat-input" className="sr-only">Ask a finance question</label>
-          <input id="chat-input" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about your finances…" maxLength={4000} disabled={busy} required />
+          <input id="chat-input" aria-describedby="finance-chat-privacy" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about your finances…" maxLength={4000} disabled={busy} required />
           <button className="primary-button" type="submit" disabled={busy || !input.trim()}>{busy ? 'Asking…' : 'Ask'}</button>
         </form>
       </section>

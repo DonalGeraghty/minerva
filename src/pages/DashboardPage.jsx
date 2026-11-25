@@ -1,154 +1,70 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import PeriodPicker from '../components/PeriodPicker.jsx'
-import { Bars, NetTrendChart, WaterfallChart } from '../components/financeCharts.jsx'
-import { eur, getCashflow, getCategories, getSummary, getSyncStatus, getTrends, syncNow } from '../services/finance.js'
-
-function Freshness({ status }) {
-  if (!status?.sync?.last_success_at) return null
-  const when = new Date(status.sync.last_success_at).toLocaleString()
-  return (
-    <p className="finance-freshness">
-      Ledger synced <time dateTime={status.sync.last_success_at}>{when}</time>
-      {status.sync.stale && <strong className="is-negative"> · showing saved data (latest sync failed: {status.sync.error})</strong>}
-      {!status.sync.stale && status.sync.coverage?.last_month && <> · coverage through {status.sync.coverage.last_month}</>}
-    </p>
-  )
-}
+import CashflowWaterfall from '../components/CashflowWaterfall.jsx'
+import { eur, getCashflow, getSummary, getSyncStatus, monthLabel } from '../services/finance.js'
+import './DashboardPage.css'
 
 export default function DashboardPage() {
-  const [period, setPeriod] = useState('this_month')
+  const [period, setPeriod] = useState('last_6')
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
-  const [status, setStatus] = useState(null)
-  const [summary, setSummary] = useState(null)
-  const [flow, setFlow] = useState([])
-  const [trend, setTrend] = useState([])
-  const [categories, setCategories] = useState([])
+  const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [syncing, setSyncing] = useState(false)
-  const [error, setError] = useState('')
-  const [errorCode, setErrorCode] = useState('')
-  const [notice, setNotice] = useState('')
-
-  const load = useCallback(async (signal) => {
-    setLoading(true)
-    setError('')
-    setErrorCode('')
-    setNotice('')
-    try {
-      const [syncStatus, summaryData, flowData, trendData, categoryData] = await Promise.all([
-        getSyncStatus(signal),
-        getSummary(period, start, end, signal),
-        getCashflow(period, start, end, 'month', signal),
-        getTrends(period, start, end, signal),
-        getCategories(period, start, end, signal),
-      ])
-      setStatus(syncStatus)
-      setSummary(summaryData)
-      setFlow(flowData.cashflow || [])
-      setTrend(trendData.trends || [])
-      setCategories((categoryData.categories || []).filter((c) => Number(c.total) < 0))
-    } catch (requestError) {
-      if (requestError.name === 'AbortError') return
-      setError(requestError.message || 'Could not load the finance dashboard')
-      setErrorCode(requestError.code || '')
-    } finally {
-      if (!signal.aborted) setLoading(false)
-    }
-  }, [period, start, end])
-
+  const [error, setError] = useState(null)
+  const rangeError = period === 'custom' && (!start || !end ? 'Choose a start and end month.' : start > end ? 'The start month must be before the end month.' : '')
   useEffect(() => {
+    if (rangeError) { setLoading(false); return }
     const controller = new AbortController()
-    load(controller.signal)
-    return () => controller.abort()
-  }, [load])
-
-  const sync = async () => {
-    setSyncing(true)
-    setError('')
-    setNotice('')
-    try {
-      const result = await syncNow()
-      setNotice(`Synced ${result.sync.row_count} rows into snapshot ${result.sync.snapshot_id.slice(0, 8)}…`)
-      await load()
-    } catch (requestError) {
-      setError(requestError.message || 'Sync failed')
-      setErrorCode(requestError.code || '')
-    } finally {
-      setSyncing(false)
+    setLoading(true)
+    setError(null)
+    const load = async () => {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const [summary, cashflow, status] = await Promise.all([
+          getSummary(period, start, end, controller.signal), getCashflow(period, start, end, 'month', controller.signal), getSyncStatus(controller.signal),
+        ])
+        if (controller.signal.aborted) return
+        if (summary.meta.snapshot_id === cashflow.meta.snapshot_id && summary.meta.rule_set_version === cashflow.meta.rule_set_version && status.sync.snapshot_id === summary.meta.snapshot_id) {
+          setData({ summary: summary.summary, flow: cashflow.cashflow || [], meta: summary.meta, status: status.sync })
+          return
+        }
+      }
+      throw new Error('Your data changed while loading. Refresh to see one consistent version.')
     }
+    load().catch((failure) => {
+      if (!controller.signal.aborted) setError({ message: failure.message || 'Could not load cash flow.', code: failure.code })
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
+    return () => controller.abort()
+  }, [period, start, end, rangeError])
+  const selectPeriod = (next) => {
+    if (next === 'custom') {
+      setStart(data?.summary.period?.start || data?.meta.coverage?.first_month || '')
+      setEnd(data?.summary.period?.end || data?.meta.coverage?.last_month || '')
+    }
+    setPeriod(next)
   }
-
-  const syncRequired = errorCode === 'sync_required'
-  const notConnected = errorCode === 'finance_not_connected'
-  const totals = summary?.summary?.adjusted_totals
-
-  return (
-    <main className="page finance-page">
-      <Brand />
-      <section className="page-hero">
-        <p className="eyebrow">Finance &middot; dashboard</p>
-        <h1>Money.</h1>
-        <p>Read-only views of your Google Sheets ledger through Janus. The ChatGPT workflow keeps writing; Minerva never does.</p>
-      </section>
-
-      <section className="app-panel" aria-label="Dashboard controls">
-        <header>
-          <div><p className="settings-kicker">Period</p><h2>Overview</h2></div>
-          <div className="form-actions">
-            <PeriodPicker period={period} setPeriod={setPeriod} start={start} setStart={setStart} end={end} setEnd={setEnd} />
-            <button className="secondary-button" type="button" onClick={sync} disabled={syncing || loading}>
-              {syncing ? 'Syncing…' : 'Sync ledger'}
-            </button>
-          </div>
-        </header>
-        <Freshness status={status} />
-        {error && (
-          <p className="settings-message is-error" role="alert">
-            {error}
-            {notConnected && <> <Link to="/account">Connect your workbook in Account.</Link></>}
-            {syncRequired && <> <button className="secondary-button" type="button" onClick={sync}>Sync now</button></>}
-          </p>
-        )}
-        {notice && <p className="settings-message is-success" role="status">{notice}</p>}
-
-        {loading && !summary ? <p role="status">Loading dashboard…</p> : totals && (
-          <>
-            <div className="finance-cards" role="group" aria-label="Totals">
-              <div className="finance-card"><span>Income</span><strong>{eur(totals.income)}</strong></div>
-              <div className="finance-card"><span>Spending</span><strong className="is-negative">{eur(totals.spending)}</strong></div>
-              <div className="finance-card"><span>Refunds</span><strong>{eur(totals.refunds)}</strong></div>
-              <div className="finance-card"><span>Net</span><strong className={Number(totals.net) < 0 ? 'is-negative' : ''}>{eur(totals.net)}</strong></div>
-              <div className="finance-card"><span>Transfers</span><strong>{eur(totals.transfers)}</strong></div>
-              <div className="finance-card"><span>Investments</span><strong>{eur(totals.investment)}</strong></div>
-            </div>
-            {summary.summary.provisional && <p className="settings-message">Sinking fund opening balance is unverified — results are provisional.</p>}
-            {summary.summary.gaps?.length > 0 && <p className="settings-message">Missing months in range (gaps, not zero): {summary.summary.gaps.join(', ')}</p>}
-            {summary.summary.receipt_conflicts?.length > 0 && <ul className="finance-warnings">{summary.summary.receipt_conflicts.map((w) => <li key={w}>{w}</li>)}</ul>}
-            {summary.meta?.warnings?.length > 0 && <details className="finance-warnings"><summary>Data-quality warnings ({summary.meta.warnings.length})</summary><ul>{summary.meta.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul></details>}
-          </>
-        )}
-      </section>
-
-      {!loading && totals && (
-        <>
-          <section className="app-panel" aria-labelledby="waterfall-heading">
-            <header><div><p className="settings-kicker">Cash flow</p><h2 id="waterfall-heading">Monthly net.</h2></div></header>
-            <WaterfallChart data={flow} />
-            <p className="finance-meta">Snapshot {summary.meta.snapshot_id?.slice(0, 8)}… · rule set v{summary.meta.rule_set_version} · source {summary.meta.source}</p>
-          </section>
-          <section className="app-panel" aria-labelledby="trend-heading">
-            <header><div><p className="settings-kicker">Trend</p><h2 id="trend-heading">Net over time.</h2></div></header>
-            <NetTrendChart points={trend} />
-          </section>
-          <section className="app-panel" aria-labelledby="categories-heading">
-            <header><div><p className="settings-kicker">Spending</p><h2 id="categories-heading">Top categories.</h2></div></header>
-            <Bars items={categories} title="Spending by category" />
-          </section>
-        </>
-      )}
-    </main>
-  )
+  const ready = !loading && !error && !rangeError && data
+  const warnings = data ? [...(data.meta.warnings || []), ...(data.summary.receipt_conflicts || [])] : []
+  const gaps = data?.summary.gaps || []
+  const selected = data?.summary.period
+  const periodLabel = selected?.start ? `${monthLabel(selected.start)} — ${monthLabel(selected.end)}` : 'All recorded months'
+  return <main className="page dashboard-page">
+    <Brand />
+    <section className="dashboard-hero"><p className="eyebrow">Your finances · dashboard</p><h1>Cash flow.</h1><p>A little perspective on the months that add up.</p></section>
+    <section className="cashflow-panel" aria-labelledby="cashflow-heading" aria-busy={loading}>
+      <header className="cashflow-heading"><div><p className="cashflow-total-label">Net over this period {ready && data.meta.source === 'local_demo' && <span className="cashflow-demo">Demo data</span>}</p><h2 id="cashflow-heading" className={`cashflow-total${ready && Number(data.summary.adjusted_totals.net) < 0 ? ' is-negative' : ''}`}>{ready && data.flow.length && data.summary.adjusted_totals.net != null ? eur(data.summary.adjusted_totals.net) : '—'}</h2>{ready && <p className="cashflow-period">{periodLabel}</p>}</div><PeriodPicker period={period} setPeriod={selectPeriod} start={start} setStart={setStart} end={end} setEnd={setEnd} /></header>
+      {rangeError && <p className="dashboard-message" role="alert">{rangeError}</p>}
+      {loading && !rangeError && <div className="cashflow-loading" role="status"><span /><p>Bringing your months into view…</p></div>}
+      {error && !rangeError && <div className="dashboard-message is-error" role="alert"><p>{error.message}</p>{['finance_not_connected', 'sync_required'].includes(error.code) ? <Link to="/account">Import your workbook in Account →</Link> : <button className="secondary-button" type="button" onClick={() => window.location.reload()}>Try again</button>}</div>}
+      {ready && <>
+        <div className="waterfall-legend" aria-label="Chart legend"><span><i className="legend-positive" />Positive month</span><span><i className="legend-negative" />Negative month</span><span><i className="legend-total" />Net total</span></div>
+        {gaps.length > 0 && <p className="dashboard-message">No coverage for {gaps.map(monthLabel).join(', ')}. These are gaps, not zero activity; the chart shows recorded months only.</p>}
+        {data.status.stale && <p className="dashboard-message">Showing saved data: the latest import failed. <Link to="/account">Refresh your import →</Link></p>}
+        <CashflowWaterfall data={data.flow} total={data.summary.adjusted_totals.net} />
+        <footer className="cashflow-footer"><p>Each month builds on the last. Running net starts at €0 for this period.</p><div><span>{data.summary.provisional ? 'Provisional figures' : 'Rule-adjusted ledger'}{data.status.last_success_at && <> · Updated {new Date(data.status.last_success_at).toLocaleDateString('en-IE', { timeZone: 'Europe/Dublin', day: 'numeric', month: 'short' })}</>}</span><Link to="/transactions">Explore the ledger ↗</Link></div></footer>
+        {(warnings.length > 0 || data.summary.provisional) && <details className="cashflow-quality"><summary>Data notes{warnings.length > 0 ? ` (${warnings.length})` : ''}</summary>{data.summary.provisional && <p>Figures are provisional. The current month may be incomplete and the sinking fund opening balance has not been verified.</p>}{warnings.length > 0 && <ul>{warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul>}<p>Applied rule set v{data.meta.rule_set_version}.</p></details>}
+      </>}
+    </section>
+  </main>
 }

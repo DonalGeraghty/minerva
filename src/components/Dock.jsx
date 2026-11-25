@@ -1,12 +1,10 @@
 import { NavLink } from 'react-router-dom'
 
 const items = [
+  { to: '/ask', label: 'Ask', icon: '✦' },
   { to: '/', label: 'Dashboard', icon: '◔', end: true },
   { to: '/transactions', label: 'Ledger', icon: '▤' },
-  { to: '/wealth', label: 'Wealth', icon: '◈' },
-  { to: '/analysis', label: 'Analysis', icon: '▦' },
   { to: '/rules', label: 'Rules', icon: '≡' },
-  { to: '/ask', label: 'Ask', icon: '✦' },
   { to: '/account', label: 'Account', icon: '●' },
 ]
 
