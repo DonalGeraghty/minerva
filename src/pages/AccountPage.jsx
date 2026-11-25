@@ -30,10 +30,9 @@ export default function AccountPage() {
 
   return (
     <main className="page account-page">
-      <Brand />
+      <header className="account-toolbar"><Brand /><button className="secondary-button" type="button" onClick={logout}>Sign out</button></header>
       <section className="account-hero"><div><p className="eyebrow">Identity · connections</p><h1>Account.</h1></div><div className="account-identity"><span>Signed in as</span><strong>{user?.email}</strong><Link to="/rules">← Back to Rules</Link></div></section>
       <FinanceConnectionSettings key={user?.accountId} />
-      <button className="secondary-button" type="button" onClick={logout}>Sign out</button>
       <AISettings />
       {user?.isDemo ? <section className="demo-account-note"><p className="settings-kicker">Local demo</p><h2>Safe to explore.</h2><p>This demo uses synthetic finance data in your local Janus server. Changes reset when Janus restarts. Sign out to return to the sign-in screen.</p></section> : <section className="danger-card" aria-labelledby="danger-heading"><div><p className="settings-kicker">Danger zone</p><h2 id="danger-heading">Delete account.</h2><p>This permanently removes the shared Janus account and all associated server data across Minerva, Aether, and Nyx.</p></div><form onSubmit={removeAccount}><label htmlFor="delete-password">Confirm with your password</label><input id="delete-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Current password" disabled={busy} />{error && <p className="settings-message is-error" role="alert">{error}</p>}<button className="secondary-button" type="submit" disabled={busy}>{busy ? 'Deleting…' : 'Delete my account'}</button></form></section>}
     </main>

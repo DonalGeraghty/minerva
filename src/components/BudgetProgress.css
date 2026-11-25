@@ -1,0 +1,9 @@
+.budget-progress { margin: 0 clamp(1.2rem, 2.5vw, 2.5rem) 1.75rem; padding: 1rem 1.2rem; border: 1px solid #3c4835; border-radius: .85rem; background: #152013; }
+.budget-progress p { margin: 0; color: #dce5cc; font-size: .83rem; line-height: 1.6; }
+.budget-progress span { display: block; margin-top: .25rem; color: #9ead94; font-size: .7rem; line-height: 1.6; }
+.budget-progress-rail { display: flex; gap: .4rem; margin-top: .9rem; }
+.budget-progress-rail i { flex: 1; height: 2px; background: #34422e; border-radius: 2px; }
+.budget-progress-rail .is-done { background: #9bb78b; }
+.budget-progress-rail .is-current { background: linear-gradient(90deg, #60754d 10%, #ddc98f 50%, #60754d 90%); background-size: 200% 100%; animation: budget-progress-sweep 2s linear infinite; }
+@keyframes budget-progress-sweep { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .budget-progress-rail .is-current { animation: none; background: #d3be83; } }

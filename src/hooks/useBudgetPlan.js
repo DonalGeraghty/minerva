@@ -1,7 +1,7 @@
 import { useStoredState, useTabSession } from '../context/TabSessionContext.jsx'
 import { createBudgetPlan } from '../services/finance.js'
 
-const EMPTY_BUDGET = { result: null, busy: false, error: '', errorCode: '', validationReason: '' }
+const EMPTY_BUDGET = { result: null, busy: false, progress: null, error: '', errorCode: '', validationReason: '' }
 
 export function useBudgetPlan(month) {
   const session = useTabSession()
@@ -12,15 +12,17 @@ export function useBudgetPlan(month) {
     session.requests.budget?.abort()
     const controller = new AbortController()
     session.requests.budget = controller
-    setState((current) => ({ ...current, busy: true, error: '', errorCode: '', validationReason: '' }))
+    setState((current) => ({ ...current, busy: true, progress: 'starting', error: '', errorCode: '', validationReason: '' }))
     try {
-      const result = await createBudgetPlan(controller.signal)
+      const result = await createBudgetPlan(controller.signal, (progress) => {
+        if (!controller.signal.aborted && session.active && session.requests.budget === controller) setState((current) => ({ ...current, progress }))
+      })
       if (!controller.signal.aborted && session.active) setState((current) => ({ ...current, result }))
     } catch (error) {
       if (!controller.signal.aborted && session.active) setState((current) => ({ ...current, error: error.message || 'Could not assess your budget.', errorCode: error.code || '', validationReason: error.validationReason || '' }))
     } finally {
       if (session.requests.budget === controller) session.requests.budget = null
-      if (session.active) setState((current) => ({ ...current, busy: false }))
+      if (session.active) setState((current) => ({ ...current, busy: false, progress: null }))
     }
   }
   return { ...state, generate }

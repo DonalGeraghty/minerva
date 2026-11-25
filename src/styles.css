@@ -22,7 +22,7 @@ html { min-width: 320px; background: var(--background); }
 body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--background); }
 button, textarea { font: inherit; }
 button:focus-visible, textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-.app-shell { min-height: 100vh; overflow: hidden; }
+.app-shell { min-height: 100vh; overflow: clip; }
 .ambient { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 .ambient::before { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0, #030303 76%); content: ''; }
 .ambient-orbit { position: absolute; display: block; border: 1px solid rgb(209 181 109 / 10%); border-radius: 50%; }
@@ -80,6 +80,7 @@ input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outl
 .account-hero h1 { margin: 0; font-size: clamp(4.2rem, 11vw, 7.6rem); font-weight: 500; letter-spacing: -.078em; line-height: .88; }
 
 .account-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 3rem; padding: clamp(5rem, 13vh, 8rem) 0 4rem; }
+.account-toolbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem 0; background: rgb(3 3 3 / 94%); backdrop-filter: blur(12px); }
 .account-identity { display: grid; justify-items: end; gap: .35rem; padding-bottom: .45rem; }
 .account-identity span { color: var(--muted); font-family: 'DM Mono', monospace; font-size: .61rem; letter-spacing: .08em; text-transform: uppercase; }
 .account-identity strong { font-size: .82rem; font-weight: 500; }

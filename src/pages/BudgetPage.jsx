@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Brand from '../components/Brand.jsx'
 import BudgetChart from '../components/BudgetChart.jsx'
+import BudgetProgress from '../components/BudgetProgress.jsx'
 import { useTabScroll, useTabState } from '../context/TabSessionContext.jsx'
 import { useBudgetPlan } from '../hooks/useBudgetPlan.js'
 import { getBudgetContext } from '../services/finance.js'
@@ -51,7 +52,7 @@ export default function BudgetPage() {
       {loading && <p role="status" className="budget-note">Reading your latest spending…</p>}
       {error && <p role="alert" className="budget-note is-warning">{error.message} <Link to="/account">Check your import →</Link></p>}
       {viewError && <p role="alert" className="budget-note is-warning">{viewError}</p>}
-      {assessment.busy && <p role="status" className="budget-note">Assessing your recent history. You can leave this tab while it finishes.</p>}
+      {assessment.busy && <BudgetProgress stage={assessment.progress} />}
       {assessment.error && <div role="alert" className="budget-note is-warning"><p>{assessment.error}</p>{assessment.validationReason && <details><summary>What prevented this plan</summary><p>{assessment.validationReason}</p></details>}{['provider_key_required', 'budget_provider_unavailable', 'settings_service_unavailable', 'credential_service_unavailable'].includes(assessment.errorCode) && <Link to="/account">Check Account →</Link>}</div>}
       {evidence?.meta.stale && <p className="budget-note is-warning">Your import needs updating in <Link to="/account">Account</Link> before AI can reassess.</p>}
       {changed && <p className="budget-note">Spending has updated. Limits stay fixed until you update with AI.</p>}
